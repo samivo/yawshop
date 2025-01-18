@@ -66,7 +66,7 @@ jobs:
       run: |
         ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
         cd /opt/stacks/yawshop/dev &&
-        # Create a temporary .env file
+        # Create a .env file (keeps it on the server)
         echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
         echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env &&
         echo 'SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}' >> .env &&
@@ -86,8 +86,7 @@ jobs:
         echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
-        docker compose up -d &&
-        # Delete the .env file after services are started"
+        docker compose up -d"
 
     # 11. Load Docker image and start services on production server
     - name: Start Services on Production Server
