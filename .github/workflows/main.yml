@@ -1,0 +1,75 @@
+name: CI/CD for YawShop
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout code
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # 2. Set up .NET
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0
+
+    # 3. Build the .NET app
+    - name: Build YawShop
+      run: dotnet build yawshop.csproj -c Release
+
+    # 4. Publish the .NET app
+    - name: Publish YawShop
+      run: dotnet publish yawshop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
+
+    # 5. Build Docker image
+    - name: Build Docker Image
+      run: docker build -t yawshop:latest .
+
+    # 6. Save Docker image for transfer
+    - name: Save Docker Image
+      run: docker save yawshop:latest -o yawshop.tar
+
+    # 7. Transfer files to production server
+    - name: Deploy to Production Server
+      run: |
+        scp yawshop.tar ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/path/to/deploy
+        scp docker-compose.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/path/to/deploy
+
+    # 8. Set Environment Variables on Production Server
+    - name: Configure Environment Variables
+      run: |
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
+        echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' >> /etc/environment &&
+        echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> /etc/environment &&
+        echo 'SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}' >> /etc/environment &&
+        echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> /etc/environment &&
+        echo 'SMTP_SENDER_EMAIL=${{ secrets.SMTP_SENDER_EMAIL }}' >> /etc/environment &&
+        echo 'SMTP_SENDER_NAME=${{ secrets.SMTP_SENDER_NAME }}' >> /etc/environment &&
+        echo 'DB_SERVER=${{ secrets.DB_SERVER }}' >> /etc/environment &&
+        echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> /etc/environment &&
+        echo 'DB_USER=${{ secrets.DB_USER }}' >> /etc/environment &&
+        echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> /etc/environment &&
+        echo 'DB_PORT=${{ secrets.DB_PORT }}' >> /etc/environment &&
+        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT }}' >> /etc/environment &&
+        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET }}' >> /etc/environment &&
+        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS }}' >> /etc/environment &&
+        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL }}' >> /etc/environment &&
+        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> /etc/environment &&
+        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> /etc/environment &&
+        export $(cat /etc/environment | xargs)"
+    
+    # 9. Load Docker image and start services on production server
+    - name: Start Services on Production Server
+      run: |
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
+        cd /path/to/deploy &&
+        docker load < yawshop.tar &&
+        docker-compose down &&
+        docker-compose up -d"
