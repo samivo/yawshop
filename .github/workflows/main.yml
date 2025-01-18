@@ -19,17 +19,14 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0
-    #debug
-    - name: Test
-      run: ls -R
-
+    
     # 3. Build the .NET app
     - name: Build YawShop
-      run: dotnet build yawshop.csproj -c Release
+      run: dotnet build YawShop.csproj -c Release
 
     # 4. Publish the .NET app
     - name: Publish YawShop
-      run: dotnet publish yawshop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
+      run: dotnet publish YawShop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
 
     # 5. Build Docker image
     - name: Build Docker Image
