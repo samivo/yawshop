@@ -138,21 +138,21 @@ namespace YawShop
             var app = builder.Build();
 
             // Apply pending migrations during startup
-            using (var scope = app.Services.CreateScope())
-            {
-                try
-                {
-                    System.Console.WriteLine("Apply db migrations");
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    dbContext.Database.Migrate(); // Applies all pending migrations    
-                }
-                catch (System.Exception)
-                {
-                    System.Console.WriteLine("Database migartions failed.");
-                    throw;
-                }
+            // using (var scope = app.Services.CreateScope())
+            // {
+            //     try
+            //     {
+            //         System.Console.WriteLine("Apply db migrations");
+            //         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            //         dbContext.Database.Migrate(); // Applies all pending migrations    
+            //     }
+            //     catch (System.Exception)
+            //     {
+            //         System.Console.WriteLine("Database migartions failed.");
+            //         throw;
+            //     }
 
-            }
+            // }
 
             app.MapGroup("/api/v1/auth").MapIdentityApi<IdentityUser>();
 
