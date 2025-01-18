@@ -1,31 +1,50 @@
 # YawShop (Yet Another Webshop)
-If you're not happy with available webshop platforms, create your own. Created primarily for fun and learning purposes.
-### Currently under heavy development, and the to-do list is long.
-Dashboard has bare minimum functions to create and sell products.
+
+If you're not satisfied with the available webshop platforms, why not create your own? This project was created primarily for fun and learning purposes.
+
+### 🚧 Currently under heavy development with a long to-do list.
+The dashboard has the bare minimum functions needed to create and sell products.
+
+---
 
 ## Features
-- **Backend API**: RESTful api.
-- **Admin Dashboard**: Dashboard for managing products, orders, and other administrative tasks.
+- **Backend API**: RESTful API.
+- **Admin Dashboard**: Manage products, orders, and other administrative tasks.
 - **Virtual Products**: Sell anything you want.
-- **Events**: Selling events made easy.
-- **Giftcards**: Create and sell gift cards. Which be applied to virtual product or event.
-- **Discounts**: Create discount for any product
+- **Events**: Simplify selling event tickets.
+- **Gift Cards**: Create and sell gift cards, which can be applied to virtual products or events.
+- **Discounts**: Create discounts for any product.
 
-## Whats inside
-- **Backend**:
-  - C# .NET Core
-  - Entity Framework Core
-  - SQL database
-  - Swagger
-- **Frontend**:
-  - React
-  - Material-UI
-  - Vite (for fast builds and development)
+---
 
-# TODO
-- Code structuring. Separating code for smaller units.
-- Unit testing. None done.
-- Separating the dashboard into independent build?
-- Language package for English (currently hardcoded in Finnish).
-- dashboard pages for discounts,events, purchases, user management, front page, analytics etc..
-- 
+## What's Inside
+### Backend:
+- C# .NET Core
+- Entity Framework Core
+- SQL Database
+- Swagger
+
+### Frontend:
+- React
+- Material-UI
+- Vite (for fast builds and development)
+
+---
+
+## TODO
+- 📦 Restructure the code into smaller, more manageable units.
+- 🧪 Implement unit testing (none has been done yet).
+- 🔄 Decide whether to separate the dashboard into an independent build.
+- 🌐 Create a language package for English (currently hardcoded in Finnish).
+- 🖥️ Develop dashboard pages for:
+  - Discounts
+  - Events
+  - Purchases
+  - User management
+  - Front page
+  - Analytics
+  - And more...
+
+---
+
+Feel free to contribute or provide feedback! 🎉
