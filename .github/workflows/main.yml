@@ -21,7 +21,7 @@ jobs:
         dotnet-version: 8.0
     #debug
     - name: Test
-      run: pwd
+      run: ls -R
 
     # 3. Build the .NET app
     - name: Build YawShop
