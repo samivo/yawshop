@@ -2,12 +2,12 @@
 FROM ubuntu:latest
 
 RUN apt-get update && \
-    apt-get install -y libicu && \
-    apt-get clean
+    apt-get install -y --no-install-recommends libicu-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set a working directory inside the container
 WORKDIR /app
-
 
 # Copy your single-file executable into the container
 # Replace 'YourAppFileName' with the actual filename of your single-file application
