@@ -19,6 +19,9 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 8.0
+    #debug
+    - name: Test
+      run: ls -R
 
     # 3. Build the .NET app
     - name: Build YawShop
