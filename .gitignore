@@ -1,1 +1,83 @@
+# .NET Core
+bin/
+obj/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.pdb
+*.mdb
+*.opendb
+*.log
+**/*.ncache
+**/*.deltalog
+
+# Entity Framework
+Migrations/
+
+# Runtime generated files
+*.db
+*.sqlite
+*.sqlite3
+*.ldf
+*.mdf
+
+# Secrets and sensitive files
+appsettings.*.json
+!appsettings.json
+*.key
+
+# IDE-specific
+.vscode/
+.idea/
+*.code-workspace
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log
+package-lock.json
+yarn.lock
+.pnp/
+.pnp.js
+.vite/
+
+# Build output
+dist/
+build/
+temp/
+out/
+
+# Vite-specific
+*.env
+*.env.*.local
+
+# Logs
+*.log
+
+# Testing
+coverage/
+*.lcov
+
+# Other
+*.gz
+*.zip
+*.tar
+*.tgz
+*.rar
+*.7z
+*.swp
+*.bak
+*.tmp
+*.tmp.*
+*.tsbuildinfo
+*.vscode/*
 
