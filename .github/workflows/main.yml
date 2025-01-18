@@ -25,62 +25,76 @@ jobs:
       run: dotnet build YawShop.csproj -c Release
 
     # 4. Build Frontend
-    - name: Set node
+    - name: Set Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
-    - name: Build front
+        node-version: 20
+    - name: Build Frontend
       run: |
         cd Frontend
         npm install
         npm run build
 
-    # 4. Publish the .NET app
+    # 5. Publish the .NET app
     - name: Publish YawShop
       run: dotnet publish YawShop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
 
-    # 5. Build Docker image
+    # 6. Build Docker image
     - name: Build Docker Image
       run: docker build -t yawshop:latest .
 
-    # 6. Save Docker image for transfer
+    # 7. Save Docker image for transfer
     - name: Save Docker Image
       run: docker save yawshop:latest -o yawshop.tar
 
-    # 7. Transfer files to production server
+    # 8. Set up SSH key
+    - name: Set Up SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PROD_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.PROD_SERVER }} >> ~/.ssh/known_hosts
+
+    # 9. Transfer files to production server
     - name: Deploy to Production Server
       run: |
-        scp yawshop.tar ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/path/to/deploy
-        scp docker-compose.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/path/to/deploy
+        scp yawshop.tar ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/dev
+        scp docker-compose.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/dev
 
-    # 8. Set Environment Variables on Production Server
-    - name: Configure Environment Variables
+    # 10. Set Environment Variables and Start Docker Compose
+    - name: Configure Environment Variables and Start Services
       run: |
         ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
-        echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' >> /etc/environment &&
-        echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> /etc/environment &&
-        echo 'SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}' >> /etc/environment &&
-        echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> /etc/environment &&
-        echo 'SMTP_SENDER_EMAIL=${{ secrets.SMTP_SENDER_EMAIL }}' >> /etc/environment &&
-        echo 'SMTP_SENDER_NAME=${{ secrets.SMTP_SENDER_NAME }}' >> /etc/environment &&
-        echo 'DB_SERVER=${{ secrets.DB_SERVER }}' >> /etc/environment &&
-        echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> /etc/environment &&
-        echo 'DB_USER=${{ secrets.DB_USER }}' >> /etc/environment &&
-        echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> /etc/environment &&
-        echo 'DB_PORT=${{ secrets.DB_PORT }}' >> /etc/environment &&
-        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT }}' >> /etc/environment &&
-        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET }}' >> /etc/environment &&
-        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS }}' >> /etc/environment &&
-        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL }}' >> /etc/environment &&
-        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> /etc/environment &&
-        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> /etc/environment &&
-        export $(cat /etc/environment | xargs)"
-    
-    # 9. Load Docker image and start services on production server
+        cd /opt/stacks/yawshop/dev &&
+        # Create a temporary .env file
+        echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
+        echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env &&
+        echo 'SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}' >> .env &&
+        echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> .env &&
+        echo 'SMTP_SENDER_EMAIL=${{ secrets.SMTP_SENDER_EMAIL }}' >> .env &&
+        echo 'SMTP_SENDER_NAME=${{ secrets.SMTP_SENDER_NAME }}' >> .env &&
+        echo 'DB_SERVER=${{ secrets.DB_SERVER }}' >> .env &&
+        echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> .env &&
+        echo 'DB_USER=${{ secrets.DB_USER }}' >> .env &&
+        echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+        echo 'DB_PORT=${{ secrets.DB_PORT }}' >> .env &&
+        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT }}' >> .env &&
+        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> .env &&
+        # Load Docker image and start services
+        docker load < yawshop.tar &&
+        docker-compose up -d &&
+        # Delete the .env file after services are started
+        rm -f .env"
+
+    # 11. Load Docker image and start services on production server
     - name: Start Services on Production Server
       run: |
         ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
-        cd /path/to/deploy &&
+        cd /opt/stacks/yawshop/dev &&
         docker load < yawshop.tar &&
         docker-compose down &&
         docker-compose up -d"
