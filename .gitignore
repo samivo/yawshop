@@ -13,8 +13,6 @@ obj/
 **/*.ncache
 **/*.deltalog
 
-# Entity Framework
-Migrations/
 
 # Runtime generated files
 *.db

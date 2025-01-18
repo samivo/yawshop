@@ -1,0 +1,136 @@
+using Microsoft.EntityFrameworkCore;
+using YawShop.Services.CheckoutService.Models;
+using YawShop.Services.DiscountService;
+using YawShop.Services.EventService;
+using YawShop.Services.GiftcardService;
+using YawShop.Services.ProductService;
+
+namespace YawShop.Services.StockService;
+
+public class StockService : IStockService
+{
+    private readonly ILogger<StockService> _logger;
+    private readonly ApplicationDbContext _context;
+
+    private readonly IGiftcardService _giftcard;
+
+    private readonly IDiscountService _discount;
+
+    private readonly IProductService _product;
+
+    private readonly IEventService _event;
+
+    public StockService(ILogger<StockService> logger, ApplicationDbContext context, IGiftcardService giftcardService, IDiscountService discountService, IProductService productService, IEventService eventService)
+    {
+        _logger = logger;
+        _context = context;
+        _giftcard = giftcardService;
+        _discount = discountService;
+        _product = productService;
+        _event = eventService;
+    }
+
+    public async Task UpdateQuantitiesAsync(string checkoutCode, bool AddQuantities)
+    {
+        try
+        {
+            //Get checkout object by id
+            var checkout = await _context.Checkouts.Include(c => c.Products).SingleAsync(c => c.Reference == checkoutCode);
+
+            await UpdateQuantitiesAsync(checkout, AddQuantities);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to update product and event quantities: {err}", ex.ToString());
+            throw;
+        }
+    }
+
+    public async Task UpdateQuantitiesAsync(CheckoutModel checkoutModel, bool AddQuantities)
+    {
+        try
+        {
+            var checkout = checkoutModel;
+
+            //Get product and event codes that included in checkout
+            var itemCodes = checkout.Products.Select(p => p.ProductCode).ToList();
+            var eventCodes = checkout.Products.Select(p => p.EventCode).ToList();
+
+            //Get product and events by codes
+            var products = await _product.FindAsync(p => itemCodes.Contains(p.Code));
+            var events = await _event.FindAsync(p => eventCodes.Contains(p.Code));
+
+            //Get giftcards
+            var giftcards = await _giftcard.FindAsync(giftcard => itemCodes.Contains(giftcard.Code));
+
+            //Get discounts
+            var discounts = await _discount.FindAsync(discount => itemCodes.Contains(discount.Code));
+
+            foreach (var product in products)
+            {
+                //Get quantity per product from checkout object
+                var quantity = checkout.Products.Where(p => p.ProductCode == product.Code).Select(p => p.Units).Single();
+
+                //Sum checkout quantities  to original product quantities
+                if (AddQuantities)
+                {
+                    product.QuantityUsed += quantity;
+                }
+                else
+                {
+                    product.QuantityUsed -= quantity;
+                }
+            }
+
+            //Update event quantities
+            foreach (var singleEvent in events)
+            {
+                var quantity = checkout.Products.Where(p => p.EventCode == singleEvent.Code).Select(p => p.Units).Single();
+
+                if (AddQuantities)
+                {
+                    singleEvent.RegistrationsQuantityUsed += quantity;
+                }
+                else
+                {
+                    singleEvent.RegistrationsQuantityUsed -= quantity;
+                }
+            }
+
+            //Update giftcards
+            foreach (var giftcard in giftcards)
+            {
+                if (AddQuantities)
+                {
+                    giftcard.SetUsed(checkout.ClientId);
+                }
+                else
+                {
+                    giftcard.SetUnused();
+                }
+            }
+
+            //Update discounts
+            foreach (var discount in discounts)
+            {
+                if (AddQuantities)
+                {
+                    discount.QuantityUsed += 1;
+                }
+                else
+                {
+                    discount.QuantityUsed -= 1;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+
+            _logger.LogError("Failed to update product and event quantities: {err}", ex.ToString());
+            throw;
+        }
+    }
+}

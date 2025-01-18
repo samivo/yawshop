@@ -1,0 +1,15 @@
+version: '3.8'
+
+networks:
+  kludatabase:
+    external: true
+
+services:
+  yawshop:
+    image: yawshop:latest
+    container_name: yawshop
+    networks:
+      - kludatabase
+    ports:
+      - "5000:5000"
+    
