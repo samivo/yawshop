@@ -87,8 +87,7 @@ jobs:
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose up -d &&
-        # Delete the .env file after services are started
-        rm -f .env"
+        # Delete the .env file after services are started"
 
     # 11. Load Docker image and start services on production server
     - name: Start Services on Production Server
