@@ -1,22 +1,22 @@
-# Use the latest Alpine base image
-FROM alpine:latest
+# Use a specific Alpine version to ensure compatibility
+FROM alpine:3.17
 
-# Install libicu and bash
-RUN apk add --no-cache libicu bash && \
-    apk add --no-cache libstdc++ # Required for .NET runtime dependencies
+# Update repositories and install necessary packages
+RUN apk update && \
+    apk add --no-cache icu bash libstdc++
 
-# Set a working directory inside the container
+# Set a working directory
 WORKDIR /app
 
-# Copy your single-file executable into the container
+# Copy the application
 COPY bin/Release/net8.0/linux-x64/publish/YawShop /app/YawShop
 COPY Frontend/dist /app/Frontend/dist
 
-# Grant execution permissions to the single-file application
+# Grant execution permissions
 RUN chmod +x /app/YawShop
 
-# Expose any necessary ports (if your app uses a web server)
+# Expose any necessary ports
 EXPOSE 5000
 
-# Run the single-file application as the default command
+# Set the default entrypoint to bash
 ENTRYPOINT ["/bin/bash"]
