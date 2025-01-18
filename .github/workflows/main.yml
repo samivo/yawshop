@@ -24,6 +24,17 @@ jobs:
     - name: Build YawShop
       run: dotnet build YawShop.csproj -c Release
 
+    # 4. Build Frontend
+    - name: Set node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16 
+    - name: Build front
+      run: |
+        cd Frontend
+        npm install
+        npm run build
+
     # 4. Publish the .NET app
     - name: Publish YawShop
       run: dotnet publish YawShop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
