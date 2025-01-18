@@ -1,22 +1,12 @@
-# Use a specific Alpine version to ensure compatibility
-FROM alpine:3.17
+FROM debian:bullseye-slim
 
-# Update repositories and install necessary packages
-RUN apk update && \
-    apk add --no-cache icu bash libstdc++
+RUN apt-get update && apt-get install -y libstdc++6 libicu67 curl && apt-get clean
 
-# Set a working directory
 WORKDIR /app
 
-# Copy the application
 COPY bin/Release/net8.0/linux-x64/publish/YawShop /app/YawShop
-COPY Frontend/dist /app/Frontend/dist
-
-# Grant execution permissions
 RUN chmod +x /app/YawShop
 
-# Expose any necessary ports
 EXPOSE 5000
 
-# Set the default entrypoint to bash
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/app/YawShop"]
