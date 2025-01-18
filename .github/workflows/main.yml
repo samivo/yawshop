@@ -96,5 +96,5 @@ jobs:
         ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
         cd /opt/stacks/yawshop/dev &&
         docker load < yawshop.tar &&
-        docker-compose down &&
-        docker-compose up -d"
+        docker compose down &&
+        docker compose up -d"

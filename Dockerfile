@@ -21,4 +21,4 @@ RUN chmod +x /app/YawShop
 EXPOSE 5000
 
 # Run the single-file application as the default command
-ENTRYPOINT ["/app/YawShop"]
+ENTRYPOINT ["/bin/bash"]
