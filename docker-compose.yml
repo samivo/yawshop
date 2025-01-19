@@ -1,9 +1,3 @@
-version: '3.8'
-
-networks:
-  kludatabase:
-    external: true
-
 services:
   
   yawshop:
@@ -17,3 +11,6 @@ services:
       - .env
     restart: unless-stopped
     
+networks:
+  kludatabase:
+    external: true
