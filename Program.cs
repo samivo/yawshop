@@ -131,7 +131,7 @@ namespace YawShop
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("http://localhost:5132", "http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                                    policy.WithOrigins("http://localhost:5132", "http://localhost:5173", "https://dev.kauppa.klu.fi").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                                 });
             });
 
