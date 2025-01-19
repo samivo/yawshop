@@ -10,7 +10,7 @@ const DashboardLazy : any = lazy(() => import('./Pages/Management/Dashboard'));
 
 function App() {
 
-
+  console.log("App function.");
   return (
     <BrowserRouter>
       <Routes>

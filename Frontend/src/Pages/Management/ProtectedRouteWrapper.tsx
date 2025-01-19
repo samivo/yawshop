@@ -6,25 +6,30 @@ import { ApiEndpoint, ApiV1, Method } from '../../Utilities/ApiFetch';
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
 
   const [authState, setAuthState] = useState<'pending' | 'authenticated' | 'unauthenticated'>('pending');
-
   const navigation = useNavigate();
 
+  console.log(`Protected route. Status: ${authState}`);
   
   useEffect( () => {
-
+    console.log(`use Effect. Status: ${authState}`);
     checkAuth();
 
   }, []);
 
+  useEffect(()=>{
+    console.log(`Auth state useffect. Status: ${authState}`);
+  },[authState]);
+
   const checkAuth = async () => {
 
-    try {
 
+    try {
+      console.log(`Start api fetch. Status: ${authState}`);
       await ApiV1(ApiEndpoint.CheckAuth, Method.GET, false);
       setAuthState("authenticated")
 
     } catch (error) {
-
+      console.log(`Fetch error. Status: ${authState}`);
       setAuthState("unauthenticated");
     }
   }
@@ -32,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
 
   if (authState === 'pending') {
    
-
+    console.log(`Auth state pending. Status: ${authState}`);
     return (
       <Box sx={{
         display: 'flex',
@@ -48,10 +53,12 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
   }
 
   if(authState === "authenticated"){
+    console.log(`Auth state authenticated. Status: ${authState}`);
     return children;
   }
   
   if(authState === "unauthenticated"){
+    console.log(`Auth state unauthenticated. Return /login. Status: ${authState}`);
     navigation("/login");
   }
 }
