@@ -5,6 +5,7 @@ import LoginPage from './Pages/Management/Login/LoginPage';
 import ProtectedRoute from './Pages/Management/ProtectedRouteWrapper';
 import { CheckoutPage } from './Pages/Public/Checkout/CheckoutPage';
 import { lazy } from 'react';
+import { PaymentCancel } from './Pages/Public/Checkout/PaymentCancel';
 
 const DashboardLazy : any = lazy(() => import('./Pages/Management/Dashboard'));
 
@@ -21,6 +22,7 @@ function App() {
           <Route path="/product/:code" element={<ProductTemplate />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path='/checkout' element={<CheckoutPage />} />
+          <Route path='/payment/cancel' element={<PaymentCancel/>} />
       </Routes>
     </BrowserRouter>
   )
