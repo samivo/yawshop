@@ -5,6 +5,7 @@ networks:
     external: true
 
 services:
+  
   yawshop:
     image: yawshop:latest
     container_name: yawshop
