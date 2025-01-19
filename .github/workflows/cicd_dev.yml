@@ -1,9 +1,9 @@
-name: CI/CD for YawShop
+name: CI/CD for dev
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
   build-and-deploy:

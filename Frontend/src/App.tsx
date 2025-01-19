@@ -20,7 +20,7 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/product/:code" element={<ProductTemplate />} />
-          <Route path="/login*" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path='/checkout' element={<CheckoutPage />} />
       </Routes>
     </BrowserRouter>
