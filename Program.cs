@@ -24,10 +24,10 @@ namespace YawShop
                 WebRootPath = "Frontend/dist/",
             });
 
-            Console.WriteLine($"Content Root Path: {builder.Environment.ContentRootPath}");
-            Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
-
-            builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
+            builder.Configuration
+            .SetBasePath(AppContext.BaseDirectory) // Ensures the app looks for files in the correct directory
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Load appsettings.json
+            .AddEnvironmentVariables(); // Add environment variables
 
             if (builder.Environment.IsDevelopment())
             {
