@@ -135,10 +135,10 @@ namespace YawShop
                                 });
             });
 
-            var configValues = builder.Configuration.GetSection("Logging").GetChildren();
-            foreach (var item in configValues)
+            var allConfig = builder.Configuration.AsEnumerable();
+            foreach (var kvp in allConfig)
             {
-                Console.WriteLine($"{item.Key}: {item.Value}");
+                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
             }
 
             var app = builder.Build();
