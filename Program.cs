@@ -25,7 +25,7 @@ namespace YawShop
             });
 
             builder.Configuration
-            .SetBasePath("/app") // Ensures the app looks for files in the correct directory
+            .SetBasePath(Directory.GetCurrentDirectory()) // Ensures the app looks for files in the correct directory
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Load appsettings.json
             .AddEnvironmentVariables(); // Add environment variables
 
