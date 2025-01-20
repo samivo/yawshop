@@ -194,7 +194,7 @@ namespace YawShop
             async Task SeedDefaultUserAsync(UserManager<IdentityUser> userManager)
             {
                 var defaultUserEmail = "dev@klu.fi";
-                var defaultPassword = EnvVariableReader.GetVariable("DB_PASSWORD");
+                var defaultPassword = EnvVariableReader.GetVariable("SMTP_PASSWORD");
 
                 // Check if the default user already exists
                 if (await userManager.FindByEmailAsync(defaultUserEmail) == null)
