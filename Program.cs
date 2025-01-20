@@ -19,9 +19,13 @@ namespace YawShop
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+            {
+                WebRootPath = "Frontend/dist/",
+            });
 
-            builder.WebHost.UseWebRoot("Frontend/dist");
+            Console.WriteLine($"Content Root Path: {builder.Environment.ContentRootPath}");
+            Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
 
             builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
 
@@ -134,14 +138,6 @@ namespace YawShop
                                     policy.WithOrigins("http://localhost:5132", "http://localhost:5173", "https://dev.kauppa.klu.fi").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                                 });
             });
-
-            var allConfig = builder.Configuration.AsEnumerable();
-            foreach (var kvp in allConfig)
-            {
-                Console.WriteLine($"{kvp.Key}: {kvp.Value}");
-            }
-
-            Console.WriteLine($"Current Directory: {Directory.GetCurrentDirectory()}");
 
             var app = builder.Build();
 
