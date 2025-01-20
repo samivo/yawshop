@@ -17,7 +17,7 @@ namespace YawShop
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(new WebApplicationOptions
             {
@@ -142,13 +142,15 @@ namespace YawShop
             {
                 try
                 {
-                    System.Console.WriteLine("Apply db migrations");
                     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    dbContext.Database.Migrate(); // Applies all pending migrations    
+                    dbContext.Database.Migrate(); // Applies all pending migrations 
+
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                    await SeedDefaultUserAsync(userManager);
+
                 }
                 catch (System.Exception)
                 {
-                    System.Console.WriteLine("Database migartions failed.");
                     throw;
                 }
 
@@ -162,6 +164,7 @@ namespace YawShop
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseStaticFiles();
@@ -186,6 +189,28 @@ namespace YawShop
             app.MapControllers().RequireAuthorization();
             app.MapFallbackToFile("index.html");
             app.Run();
+
+            //Remove this debug only
+            async Task SeedDefaultUserAsync(UserManager<IdentityUser> userManager)
+            {
+                var defaultUserEmail = "dev@klu.fi";
+                var defaultPassword = "ThisIsVerySecretDevPassword";
+
+                // Check if the default user already exists
+                if (await userManager.FindByEmailAsync(defaultUserEmail) == null)
+                {
+                    var user = new IdentityUser
+                    {
+                        UserName = defaultUserEmail,
+                        Email = defaultUserEmail,
+                        EmailConfirmed = true
+                    };
+
+                    // Create the user
+                    var result = await userManager.CreateAsync(user, defaultPassword);
+
+                }
+            }
         }
     }
 }
