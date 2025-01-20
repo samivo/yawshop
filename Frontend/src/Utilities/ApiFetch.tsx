@@ -1,9 +1,9 @@
 
-export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: boolean, fetchBody?: any): Promise<any> {
+export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: boolean, fetchBody?: any, queryParameter?: string): Promise<any> {
 
     try {
 
-        const response = await fetch(endpoint + (publicApi ? "/public" : ""), {
+        const response = await fetch(endpoint + (queryParameter? queryParameter : "") + (publicApi ? "/public" : ""), {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
@@ -13,10 +13,7 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
         });
 
         if (!response.ok) {
-
-            console.log(response);
             throw new Error("Jotain meni pieleen.");
-            
         }
 
         const data = await response.json();
@@ -37,6 +34,7 @@ export enum ApiEndpoint {
     Discount = "api/v1/discount/validate",
     Checkout = "/api/v1/checkout",
     CheckAuth = "/api/v1/auth/manage/info",
+    Login = "/api/v1/auth/login",
 }
 
 export enum Method {

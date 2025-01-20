@@ -3,10 +3,8 @@ import ProductModel, { CustomerFieldType, ProductSpesificClientFields, ProductTy
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { TextField, Modal, Box, Grid2, InputAdornment, IconButton, FormGroup, FormControlLabel, Switch, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Avatar } from "@mui/material";
-import postProduct from "../../../Utilities/PostProduct";
-import updateProduct from "../../../Utilities/UpdateProduct";
-import deleteProduct from "../../../Utilities/DeleteProduct";
 import { Editor } from '@tinymce/tinymce-react';
+import { ApiEndpoint, ApiV1, Method } from "../../../Utilities/ApiFetch";
 
 
 declare global {
@@ -111,19 +109,24 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
     const handleSubmit = async () => {
 
+        //If there is product, update it otherwise add it
         if (product) {
 
             try {
-                await updateProduct(formData);
+                await ApiV1(ApiEndpoint.Product, Method.PUT, false, formData, `/${formData.code}`);
             } catch (error) {
+                console.log(error);
+                //show error to user?
                 return;
             }
 
         }
         else {
             try {
-                await postProduct(formData);
+                await ApiV1(ApiEndpoint.Product, Method.POST, false, formData);
             } catch (error) {
+                console.log(error);
+                //show error to user?
                 return;
             }
         }
@@ -134,7 +137,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
     const handleDelete = async () => {
 
         try {
-            await deleteProduct(formData);
+            await ApiV1(ApiEndpoint.Product, Method.DELETE, false, null, formData.code);
         } catch (error) {
             return;
         }

@@ -126,7 +126,7 @@ public class PaytrailService : IPaymentService
 
             }
 
-            var secret = Environment.GetEnvironmentVariable("PAYTRAIL_SECRET") ?? throw new InvalidOperationException("Unable to validate callback. Paytrail env variables missing.");
+            var secret = EnvVariableReader.GetVariable("PAYTRAIL_SECRET");
 
             var signature = PaytrailCrypto.CalculateHmac(secret, headers, "", headers["checkout-algorithm"]);
 
