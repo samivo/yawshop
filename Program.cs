@@ -135,6 +135,12 @@ namespace YawShop
                                 });
             });
 
+            var configValues = builder.Configuration.GetSection("Logging").GetChildren();
+            foreach (var item in configValues)
+            {
+                Console.WriteLine($"{item.Key}: {item.Value}");
+            }
+
             var app = builder.Build();
 
             // Apply pending migrations during startup
