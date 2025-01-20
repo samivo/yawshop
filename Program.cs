@@ -104,7 +104,7 @@ namespace YawShop
                 }
             });
 
-            builder.Services.AddTransient<IEmailSender<IdentityUser>, TestEmailer>();
+            builder.Services.AddTransient<IEmailSender<IdentityUser>, Emailer>();
 
             builder.Services.AddScoped<IEmailer, Emailer>();
 

@@ -27,7 +27,6 @@ public class CheckoutService : ICheckoutService
     private readonly ApplicationDbContext _context;
     private readonly IPaymentService _payment;
     private readonly IStockService _stock;
-
     private readonly IEmailer _email;
 
 

@@ -1,9 +1,6 @@
-﻿
-using MailKit.Net.Smtp;
-using MailKit;
+﻿using MailKit.Net.Smtp;
 using MimeKit;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace YawShop.Services.EmailService
@@ -103,7 +100,7 @@ namespace YawShop.Services.EmailService
     /// <summary>
     /// Testing emailer class
     /// </summary>
-    public class TestEmailer : IEmailer
+    public class TestEmailer
     {
         private readonly SmtpSettings _smtpSettings;
         private readonly ILogger _logger;
