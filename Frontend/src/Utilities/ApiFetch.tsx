@@ -12,8 +12,17 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
             body: fetchBody ? JSON.stringify(fetchBody) : undefined,
         });
 
+        
         if (!response.ok) {
             throw new Error("Jotain meni pieleen.");
+        }
+
+        //Login post does not return json body
+        if(endpoint === ApiEndpoint.Login){
+
+            if (response.ok) {
+                return "Ok";
+            }
         }
 
         const data = await response.json();
