@@ -1,4 +1,4 @@
-import { Alert, Avatar, Box, Button, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, Snackbar, SnackbarCloseReason, Step, StepLabel, Stepper, SxProps, TextField, Typography } from "@mui/material";
+import { Alert, Avatar, Box, Button, CircularProgress, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, Snackbar, SnackbarCloseReason, Step, StepLabel, Stepper, SxProps, TextField, Typography } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -222,6 +222,7 @@ export const CheckoutPage: React.FC = () => {
     const [error, SetError] = useState<FormErrorState[]>(initialErrorState);
     const [openSnackBar, SetOpenSnackBar] = useState(false);
     const [snackText, SetSnackText] = useState<string>("");
+    const [paymentButtonStatus, SetPaymentButtonStatus] = useState<'normal' | 'fetching'>("normal");
 
     useEffect(() => {
 
@@ -300,6 +301,8 @@ export const CheckoutPage: React.FC = () => {
 
         //TODO Backend only supports currenly one giftcard or discount code!
 
+        SetPaymentButtonStatus("fetching");
+
         try {
             await validateClientFields();
 
@@ -337,6 +340,9 @@ export const CheckoutPage: React.FC = () => {
             }
 
             SetOpenSnackBar(true);
+        }
+        finally{
+            SetPaymentButtonStatus("normal");
         }
 
     }
@@ -594,8 +600,16 @@ export const CheckoutPage: React.FC = () => {
                                 })}
 
                                 <Typography sx={{ width: '300px', textAlign: 'start' }} variant="body2">* Pakollinen kenttä</Typography>
+                                {paymentButtonStatus === "normal" ? (
+                                    <>
+                                    <Button sx={{ width: '200px' }} color="success" variant="contained" onClick={handlePaymentButton}>Siirry maksamaan</Button>
+                                    </>
+                                ):(
+                                    <>
+                                    <Button sx={{ width: '200px' }} color="success" variant="contained"><CircularProgress></CircularProgress></Button>
+                                    </>
+                                )}
                                 
-                                <Button sx={{ width: '200px' }} color="success" variant="contained" onClick={handlePaymentButton}>Siirry maksamaan</Button>
                                 <Typography sx={{ width: '360px', textAlign: 'center' }} variant="h6">Maksa turvallisesti paytrailin kautta!</Typography>
                             </Grid>
 
