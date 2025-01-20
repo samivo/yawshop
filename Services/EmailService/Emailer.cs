@@ -75,25 +75,7 @@ namespace YawShop.Services.EmailService
             return;
         }
 
-        Task IEmailSender<IdentityUser>.SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task IEmailer.SendMailAsync(EmailMessage EmailMessage)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task IEmailSender<IdentityUser>.SendPasswordResetCodeAsync(IdentityUser user, string email, string resetCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task IEmailSender<IdentityUser>.SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 
 

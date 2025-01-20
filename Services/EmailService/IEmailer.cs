@@ -5,7 +5,7 @@ namespace YawShop.Services.EmailService
     /// <summary>
     /// Interface for sending emails.
     /// </summary>
-    public interface IEmailer : IEmailSender<IdentityUser>
+    public interface IEmailer
     {
         /// <summary>
         /// Sends email async.
