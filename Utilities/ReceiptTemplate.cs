@@ -92,7 +92,7 @@ namespace YawShop.Utilities
                     {productListHtml}
                     <p>Yhteensä {total / 100} €</p
                     <br>
-                    <p>Tapahtuma viite: {checkout.Reference}</p>
+                    <p>Viite: {checkout.TransactionId}</p>
                     <br>
                     <p>Terveisin<br>Kuopion laskuvarjourheilijat Ry<br>www.klu.fi</p>
                     <div class=""footer"">

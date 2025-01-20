@@ -8,7 +8,7 @@ namespace YawShop.Services.EmailService
     /// <summary>
     /// Sends a email using smtp client
     /// </summary>
-    public class Emailer : IEmailer
+    public class Emailer : IEmailer , IEmailSender<IdentityUser>
     {
         private readonly SmtpSettings _smtpSettings;
         private readonly ILogger _logger;
@@ -22,6 +22,7 @@ namespace YawShop.Services.EmailService
             _smtpSettings = smtpSettings.Value;
             _logger = logger;
         }
+
 
         /// <summary>
         /// <Sends cref="EmailMessage"/> async. BCC is used if multipe recipient.
@@ -75,7 +76,20 @@ namespace YawShop.Services.EmailService
             return;
         }
 
-        
+        public Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendPasswordResetCodeAsync(IdentityUser user, string email, string resetCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 

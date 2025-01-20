@@ -144,6 +144,7 @@ public class PaytrailService : IPaymentService
             switch (receivedPaymentStatus)
             {
                 case PaytrailPaymentStatuses.New:
+                    // The callback status from paytrail should never be "new"
                     throw new InvalidOperationException("Paytrail callback status was New. Something went wrong!");
 
                 case PaytrailPaymentStatuses.Ok:

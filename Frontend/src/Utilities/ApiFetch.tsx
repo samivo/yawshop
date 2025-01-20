@@ -3,7 +3,7 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
 
     try {
 
-        const response = await fetch(endpoint + (queryParameter? queryParameter : "") + (publicApi ? "/public" : ""), {
+        const response = await fetch(endpoint + (publicApi ? "/public" : "") + (queryParameter? queryParameter : ""), {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
@@ -44,6 +44,7 @@ export enum ApiEndpoint {
     Checkout = "/api/v1/checkout",
     CheckAuth = "/api/v1/auth/manage/info",
     Login = "/api/v1/auth/login",
+    Giftcard = "/api/v1/giftcard"
 }
 
 export enum Method {
