@@ -43,8 +43,8 @@ public class PaytrailService : IPaymentService
 
             if (!string.IsNullOrEmpty(_paytrailSettings.CallbackSuccess) && !string.IsNullOrEmpty(_paytrailSettings.CallbackCancel))
             {
-                // request.CallbackUrls.Success = _paytrailSettings.CallbackSuccess;
-                // request.CallbackUrls.Cancel = _paytrailSettings.CallbackCancel;
+                 request.CallbackUrls.Success = _paytrailSettings.CallbackSuccess;
+                 request.CallbackUrls.Cancel = _paytrailSettings.CallbackCancel;
             }
 
             var totalAmount = 0;
