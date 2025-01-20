@@ -137,7 +137,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
     const handleDelete = async () => {
 
         try {
-            await ApiV1(ApiEndpoint.Product, Method.DELETE, false, null, formData.code);
+            await ApiV1(ApiEndpoint.Product, Method.DELETE, false, null, `/${formData.code}`);
         } catch (error) {
             return;
         }
