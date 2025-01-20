@@ -21,6 +21,8 @@ namespace YawShop
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.WebHost.UseWebRoot("Frontend/dist");
+
             builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
 
             if (builder.Environment.IsDevelopment())

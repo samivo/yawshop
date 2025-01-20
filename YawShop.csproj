@@ -14,8 +14,6 @@
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
-</ItemGroup>
-
   <ItemGroup>
     <Compile Remove="bin\**" />
     <Compile Remove="Database\**" />
