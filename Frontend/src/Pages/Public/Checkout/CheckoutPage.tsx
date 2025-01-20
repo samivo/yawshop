@@ -121,9 +121,6 @@ const CartList: React.FC<Props> = (props) => {
 
                         </ListItem>
 
-                        <Divider />
-
-
                         {cartItem.discount && (
                             <>
                                 <ListItem key={Math.random()} dense={false} sx={{ border: 'solid 0px', borderRadius: '10px', borderColor: 'lightgray' }}>

@@ -454,10 +454,26 @@ public class CheckoutService : ICheckoutService
     {
         try
         {
-            //Email invoice ! TODO
 
             var checkout = await _context.Checkouts.Include(checkout => checkout.Products).SingleAsync(checkout => checkout.Reference == checkoutReference);
             checkout.Client = (await _client.GetAsync(client => client.Id == checkout.ClientId)).SingleOrDefault() ?? throw new InvalidOperationException("Cant find checkout's user from database?");
+
+            //Send Receipt
+            try
+            {
+                var receipt = new EmailMessage
+                {
+                    Body = ReceiptTemplate.GetEmailBody(checkout),
+                    Subject = "Kuitti",
+                    To = [checkout.Client.Email]
+                };
+
+                await _email.SendMailAsync(receipt);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError("Payment success but failed to send receipt to customer: {ex}", ex.ToString());
+            }
 
             foreach (var productInfo in checkout.Products)
             {
