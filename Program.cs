@@ -25,6 +25,8 @@ namespace YawShop
 
             });
 
+            builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
+
             if (builder.Environment.IsDevelopment())
             {
                 Env.Load();
@@ -140,6 +142,8 @@ namespace YawShop
             {
                 Console.WriteLine($"{kvp.Key}: {kvp.Value}");
             }
+
+            Console.WriteLine($"Current Directory: {Directory.GetCurrentDirectory()}");
 
             var app = builder.Build();
 
