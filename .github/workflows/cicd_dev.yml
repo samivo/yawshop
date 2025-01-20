@@ -84,6 +84,7 @@ jobs:
         echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL }}' >> .env &&
         echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> .env &&
         echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> .env &&
+        echo 'ASPNETCORE_ENVIRONMENT=Production' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose up -d"
