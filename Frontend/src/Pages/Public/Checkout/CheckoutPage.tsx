@@ -600,13 +600,16 @@ export const CheckoutPage: React.FC = () => {
                                 })}
 
                                 <Typography sx={{ width: '300px', textAlign: 'start' }} variant="body2">* Pakollinen kenttä</Typography>
+
                                 {paymentButtonStatus === "normal" ? (
                                     <>
                                     <Button sx={{ width: '200px' }} color="success" variant="contained" onClick={handlePaymentButton}>Siirry maksamaan</Button>
                                     </>
                                 ):(
                                     <>
-                                    <Button sx={{ width: '200px' }} color="success" variant="contained"><CircularProgress></CircularProgress></Button>
+                                    <Box sx={{display:'flex', width:'100%', justifyContent:'center'}}>
+                                        <CircularProgress></CircularProgress>
+                                    </Box>
                                     </>
                                 )}
                                 
