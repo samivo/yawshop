@@ -14,12 +14,6 @@
     <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Update="appsettings.json">
-        <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        <IncludeInSingleFile>true</IncludeInSingleFile>
-    </None>
-    
 </ItemGroup>
 
   <ItemGroup>

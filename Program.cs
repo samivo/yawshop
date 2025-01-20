@@ -19,11 +19,7 @@ namespace YawShop
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(new WebApplicationOptions
-            {
-                WebRootPath = "Frontend/dist/",
-
-            });
+            var builder = WebApplication.CreateBuilder(args);
 
             builder.Configuration.SetBasePath(Directory.GetCurrentDirectory());
 
