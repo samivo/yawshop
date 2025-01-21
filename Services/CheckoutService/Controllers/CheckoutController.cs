@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json;
 using YawShop.Services.CheckoutService.Models;
 
@@ -19,7 +20,7 @@ public class CheckoutController : ControllerBase
         _checkout = checkoutService;
 
     }
-
+    
     [AllowAnonymous]
     [HttpPost("public")]
     public async Task<IActionResult> CreatePayment([FromBody] ShoppingCartModel shoppingCart)

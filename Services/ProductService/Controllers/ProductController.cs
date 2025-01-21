@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using YawShop.Services.ProductService.Models;
 
 namespace YawShop.Services.ProductService.Controllers;
@@ -35,6 +36,7 @@ public class ProductController : ControllerBase
         }
     }
 
+    // [EnableRateLimiting("paymentLimiter")]
     [AllowAnonymous]
     [HttpGet("public")]
     public async Task<IActionResult> GetAllPublic()

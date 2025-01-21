@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
         if (!newErrors.email && !newErrors.password) {
 
             try {
-                await ApiV1(ApiEndpoint.Login, Method.POST, false, loginForm, "/?useCookies=true&useSessionCookies=false");
+                await ApiV1(ApiEndpoint.Login, Method.POST, false, loginForm);
                 navigation("/dashboard");
 
             } catch (error) {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using YawShop.Services.CheckoutService;
 using YawShop.Services.StockService;
 using YawShop.Services.ClientService;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace YawShop.Services.PaymentService.Controllers;
 
@@ -30,6 +31,7 @@ public class PaymentController : ControllerBase
         _client = clientService;
     }
 
+    
     [AllowAnonymous]
     [HttpGet("callback")]
     public async Task<IActionResult> PaymentCallbackGet()

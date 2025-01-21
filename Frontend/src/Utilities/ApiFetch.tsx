@@ -43,7 +43,7 @@ export enum ApiEndpoint {
     Discount = "api/v1/discount/validate",
     Checkout = "/api/v1/checkout",
     CheckAuth = "/api/v1/auth/manage/info",
-    Login = "/api/v1/auth/login",
+    Login = "/api/v1/auth/public/login",
     Giftcard = "/api/v1/giftcard"
 }
 

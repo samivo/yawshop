@@ -57,11 +57,19 @@ namespace YawShop
                 }
             });
 
-            var test = builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>(options=>{
+                options.Password.RequireDigit = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "auth_cookie";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
             builder.Services.AddAuthorization();
@@ -139,7 +147,21 @@ namespace YawShop
                                 });
             });
 
+            // builder.Services.AddRateLimiter(options =>
+            // {
+            //     options.AddFixedWindowLimiter(policyName: "paymentLimiter", options =>
+            //     {
+            //         options.PermitLimit = 200;
+            //         options.Window = TimeSpan.FromSeconds(3600);
+            //         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            //         options.QueueLimit = 0;
+            //     });
+            //     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            // });
+
             var app = builder.Build();
+
+            // app.UseRateLimiter();
 
             using (var scope = app.Services.CreateScope())
             {
@@ -163,7 +185,10 @@ namespace YawShop
 
             }
 
-            app.MapGroup("/api/v1/auth").MapIdentityApi<IdentityUser>();
+            app.MapGroup("/api/v1/auth")
+            .MapIdentityApi<IdentityUser>()
+            .RequireAuthorization();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -195,7 +220,7 @@ namespace YawShop
             app.MapControllers().RequireAuthorization();
             app.MapFallbackToFile("index.html");
             app.Run();
-
+            
             //Remove this debug only
             async Task SeedDefaultUserAsync(UserManager<IdentityUser> userManager)
             {
