@@ -63,13 +63,13 @@ jobs:
         cd /opt/stacks/yawshop &&
         docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
 
-    # 9. Transfer files to Dev server
-    - name: Deploy to Dev Server
+    # 9. Transfer files to server
+    - name: Transfer files to server
       run: |
         scp yawshop.tar ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
         scp docker-compose.yml ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
 
-    # 10. Set Environment Variables and Start Docker Compose
+    # 10. Set Environment Variables and start services
     - name: Configure Environment Variables and Start Services
       run: |
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
@@ -93,14 +93,6 @@ jobs:
         echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> .env &&
         echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> .env &&
         # Load Docker image and start services
-        docker load < yawshop.tar &&
-        docker compose up -d"
-
-    # 11. Load Docker image and start services on Dev server
-    - name: Start Services on Dev Server
-      run: |
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
-        cd /opt/stacks/yawshop &&
         docker load < yawshop.tar &&
         docker compose down &&
         docker compose up -d"
