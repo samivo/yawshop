@@ -1,9 +1,9 @@
-name: Migrate and deploy to dev
+ame: Migrate and deploy to production
 
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   build-and-deploy:
@@ -51,28 +51,28 @@ jobs:
     - name: Set Up SSH Key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.DEV_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.PROD_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.DEV_SERVER }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.PROD_SERVER }} >> ~/.ssh/known_hosts
 
     # 9. Migrate database
     - name: Migrate database
       run: |
-        scp migrations.sql ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop/migrations.sql
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
+        scp migrations.sql ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/migrations.sql
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
         cd /opt/stacks/yawshop &&
         docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
 
     # 9. Transfer files to server
     - name: Transfer files to server
       run: |
-        scp yawshop.tar ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
-        scp docker-compose.yml ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
+        scp yawshop.tar ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop
+        scp docker-compose.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop
 
     # 10. Set Environment Variables and start services
     - name: Configure Environment Variables and Start Services
       run: |
-        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
+        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
         cd /opt/stacks/yawshop &&
         # Create a .env file (keeps it on the server)
         echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
@@ -86,12 +86,12 @@ jobs:
         echo 'DB_USER=${{ secrets.DB_USER }}' >> .env &&
         echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
         echo 'DB_PORT=${{ secrets.DB_PORT }}' >> .env &&
-        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT_DEV }}' >> .env &&
-        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET_DEV }}' >> .env &&
-        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS_DEV }}' >> .env &&
-        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL_DEV }}' >> .env &&
-        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS_DEV }}' >> .env &&
-        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL_DEV }}' >> .env &&
+        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT }}' >> .env &&
+        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL }}' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose down &&
