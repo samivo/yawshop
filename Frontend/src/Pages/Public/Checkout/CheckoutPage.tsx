@@ -221,10 +221,7 @@ export const CheckoutPage: React.FC = () => {
     const [snackText, SetSnackText] = useState<string>("");
     const [paymentButtonStatus, SetPaymentButtonStatus] = useState<'normal' | 'fetching'>("normal");
 
-    const [terms1, SetTerm1] = useState<boolean>(false);
-    const [terms2, SetTerms2] = useState<boolean>(false);
-    const [terms3, SetTerms3] = useState<boolean>(false);
-
+    //TODO fix this
     const [checked1,SetChecked1] = useState<boolean>(false);
     const [checked2,SetChecked2] = useState<boolean>(false);
     const [checked3,SetChecked3] = useState<boolean>(false);
@@ -630,8 +627,6 @@ export const CheckoutPage: React.FC = () => {
                                         <FormControlLabel required control={<Checkbox checked={checked3} onChange={(event) => { SetChecked3(event.target.checked); SetError([]) }} />} label={<span> Hyväksyn <Link href="https://www.paytrail.com/kuluttaja/tietoa-maksamisesta" target="_blank" rel="noreferrer">maksuehdot</Link></span>} />
                                         <FormHelperText>{error.find(error => error.fieldName === "terms3")?.errorText}</FormHelperText>
                                     </FormGroup>
-
-
                                 </FormControl>
 
                                 <Typography sx={{ width: '300px', textAlign: 'start' }} variant="body2">* Pakollinen kenttä</Typography>
