@@ -25,9 +25,9 @@ namespace YawShop
             });
 
             builder.Configuration
-            .SetBasePath(Directory.GetCurrentDirectory()) // Ensures the app looks for files in the correct directory
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) // Load appsettings.json
-            .AddEnvironmentVariables(); // Add environment variables
+            .SetBasePath(Directory.GetCurrentDirectory()) 
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) 
+            .AddEnvironmentVariables(); 
 
             if (builder.Environment.IsDevelopment())
             {
@@ -141,16 +141,19 @@ namespace YawShop
 
             var app = builder.Build();
 
-            // Apply pending migrations during startup
             using (var scope = app.Services.CreateScope())
             {
                 try
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    dbContext.Database.Migrate(); // Applies all pending migrations 
-
                     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
                     await SeedDefaultUserAsync(userManager);
+
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    if (context.Database.HasPendingModelChanges())
+                    {
+                        throw new InvalidOperationException("The database model has pending changes that need to be added to a migration.");
+                    }
 
                 }
                 catch (System.Exception)
@@ -186,7 +189,6 @@ namespace YawShop
                     "form-action 'self';");
                 await next();
             });
-
 
             app.UseAuthentication();
             app.UseAuthorization();

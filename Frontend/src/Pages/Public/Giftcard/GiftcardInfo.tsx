@@ -1,4 +1,4 @@
-import { Box} from "@mui/material";
+import { Box } from "@mui/material";
 import { useParams } from "react-router-dom";
 import lahjakortti from "./Lahjakortti_v3.svg";
 import { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ import { DateToString } from "../../../Utilities/DateToString";
 export const GiftcardInfo: React.FC = () => {
 
     const { code } = useParams<{ code: string }>();
-    const [giftcardSvg,SetGiftcardSvg] = useState<string>("");
+    const [giftcardSvg, SetGiftcardSvg] = useState<string>("");
 
     useEffect(() => {
 
@@ -24,6 +24,7 @@ export const GiftcardInfo: React.FC = () => {
                 const modifiedGiftcard = modifyGiftcard(response, svgText);
                 SetGiftcardSvg(modifiedGiftcard);
 
+
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -32,6 +33,7 @@ export const GiftcardInfo: React.FC = () => {
         fetchData();
 
     }, [code]);
+
 
     const modifyGiftcard = (giftcardInfo: GiftcardModelPublic, giftcardSvg: string): string => {
 
