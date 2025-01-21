@@ -263,7 +263,7 @@ const ProductTemplate: React.FC = () => {
                             </Grid>
                             
 
-                            <Grid container size={{ xs: 12, md: 5 }} >
+                            <Grid container size={{ xs: 12, md: 5 }} sx={{display:'flex', justifyContent:'center'}} >
                                 <Paper elevation={0} sx={{ padding: '10px' }}>
 
                                     <Grid container size={12} spacing={1} >
