@@ -59,7 +59,7 @@ jobs:
     - name: Migrate database
       run: |
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
-        cd /opt/stacks/yawshop/dev &&
+        cd /opt/stacks/yawshop &&
         docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
 
     # 9. Transfer files to Dev server
