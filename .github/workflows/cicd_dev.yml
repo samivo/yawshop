@@ -58,6 +58,7 @@ jobs:
     # 9. Migrate database
     - name: Migrate database
       run: |
+        scp migrations.sql ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop/migrations.sql
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
         cd /opt/stacks/yawshop &&
         docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
