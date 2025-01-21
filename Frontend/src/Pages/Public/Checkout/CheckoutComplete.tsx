@@ -53,6 +53,7 @@ export const CheckoutComplete: React.FC<Props> = ({ success, redirectUrl }: Prop
                         <>
                             <Typography textAlign={"center"} variant="h4">Wohoo!</Typography>
                             <Typography textAlign={"center"} variant="h4">Maksu onnistui!</Typography>
+                            <Typography textAlign={"center"} variant="body1">Lähetämme kuitin sähköpostiisi.</Typography>
                         </>
                     ) : (
                         <>
