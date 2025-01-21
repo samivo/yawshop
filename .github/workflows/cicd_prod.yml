@@ -1,4 +1,4 @@
-ame: Migrate and deploy to production
+name: Migrate and deploy to production
 
 on:
   push:
