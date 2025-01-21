@@ -72,7 +72,7 @@ jobs:
     - name: Configure Environment Variables and Start Services
       run: |
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
-        cd /opt/stacks/yawshop/dev &&
+        cd /opt/stacks/yawshop &&
         # Create a .env file (keeps it on the server)
         echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
         echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env &&
@@ -99,7 +99,7 @@ jobs:
     - name: Start Services on Dev Server
       run: |
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
-        cd /opt/stacks/yawshop/dev &&
+        cd /opt/stacks/yawshop &&
         docker load < yawshop.tar &&
         docker compose down &&
         docker compose up -d"
