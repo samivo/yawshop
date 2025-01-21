@@ -1,4 +1,4 @@
-name: CI/CD for dev
+name: Migrate and deploy to dev
 
 on:
   push:
@@ -51,20 +51,27 @@ jobs:
     - name: Set Up SSH Key
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.PROD_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.DEV_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.PROD_SERVER }} >> ~/.ssh/known_hosts
+        ssh-keyscan -H ${{ secrets.DEV_SERVER }} >> ~/.ssh/known_hosts
 
-    # 9. Transfer files to production server
-    - name: Deploy to Production Server
+    # 9. Migrate database
+    - name: Migrate database
       run: |
-        scp yawshop.tar ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/dev
-        scp docker-compose.yml ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/dev
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
+        cd /opt/stacks/yawshop/dev &&
+        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
+
+    # 9. Transfer files to Dev server
+    - name: Deploy to Dev Server
+      run: |
+        scp yawshop.tar ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
+        scp docker-compose.yml ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
 
     # 10. Set Environment Variables and Start Docker Compose
     - name: Configure Environment Variables and Start Services
       run: |
-        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
         cd /opt/stacks/yawshop/dev &&
         # Create a .env file (keeps it on the server)
         echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
@@ -88,10 +95,10 @@ jobs:
         docker load < yawshop.tar &&
         docker compose up -d"
 
-    # 11. Load Docker image and start services on production server
-    - name: Start Services on Production Server
+    # 11. Load Docker image and start services on Dev server
+    - name: Start Services on Dev Server
       run: |
-        ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
         cd /opt/stacks/yawshop/dev &&
         docker load < yawshop.tar &&
         docker compose down &&
