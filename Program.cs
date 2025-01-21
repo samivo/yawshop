@@ -25,15 +25,16 @@ namespace YawShop
             });
 
             builder.Configuration
-            .SetBasePath(Directory.GetCurrentDirectory()) 
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true) 
-            .AddEnvironmentVariables(); 
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddEnvironmentVariables();
 
             if (builder.Environment.IsDevelopment())
             {
                 Env.Load();
             }
-            else{
+            else
+            {
                 builder.WebHost.UseUrls("http://0.0.0.0:5000");
             }
 
@@ -57,7 +58,8 @@ namespace YawShop
                 }
             });
 
-            builder.Services.AddIdentityApiEndpoints<IdentityUser>(options=>{
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
+            {
                 options.Password.RequireDigit = true;
             })
             .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -220,7 +222,7 @@ namespace YawShop
             app.MapControllers().RequireAuthorization();
             app.MapFallbackToFile("index.html");
             app.Run();
-            
+
             //Remove this debug only
             async Task SeedDefaultUserAsync(UserManager<IdentityUser> userManager)
             {
