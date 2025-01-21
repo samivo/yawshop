@@ -1,4 +1,4 @@
-import { Alert, Avatar, Box, Button, CircularProgress, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, Snackbar, SnackbarCloseReason, Step, StepLabel, Stepper, SxProps, TextField, Typography } from "@mui/material";
+import { Alert, Avatar, Box, Button, Checkbox, CircularProgress, Divider, FormControl, FormControlLabel, FormGroup, FormHelperText, IconButton, Link, List, ListItem, ListItemAvatar, ListItemText, Snackbar, SnackbarCloseReason, Step, StepLabel, Stepper, SxProps, TextField, Typography } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -221,6 +221,14 @@ export const CheckoutPage: React.FC = () => {
     const [snackText, SetSnackText] = useState<string>("");
     const [paymentButtonStatus, SetPaymentButtonStatus] = useState<'normal' | 'fetching'>("normal");
 
+    const [terms1, SetTerm1] = useState<boolean>(false);
+    const [terms2, SetTerms2] = useState<boolean>(false);
+    const [terms3, SetTerms3] = useState<boolean>(false);
+
+    const [checked1,SetChecked1] = useState<boolean>(false);
+    const [checked2,SetChecked2] = useState<boolean>(false);
+    const [checked3,SetChecked3] = useState<boolean>(false);
+
     useEffect(() => {
 
         let storage = localStorage.getItem("shop_cart");
@@ -399,6 +407,19 @@ export const CheckoutPage: React.FC = () => {
             }
         });
 
+        if(!checked1){
+            SetError((prevValue) => ([...prevValue, { fieldName: "terms1", errorText: "Vaaditaan!" }]));
+            throw new Error("Hyväksy ehdot!");
+        }
+        if(!checked2){
+            SetError((prevValue) => ([...prevValue, { fieldName: "terms2", errorText: "Vaaditaan!" }]));
+            throw new Error("Hyväksy ehdot!");
+        }
+
+        if(!checked3){
+            SetError((prevValue) => ([...prevValue, { fieldName: "terms3", errorText: "Vaaditaan!" }]));
+            throw new Error("Hyväksy ehdot!");
+        }
         
 
     }
@@ -595,6 +616,23 @@ export const CheckoutPage: React.FC = () => {
                                         />
                                     );
                                 })}
+
+                                <FormControl error={error.some(error => error.fieldName.includes("terms"))}>
+                                    <FormGroup sx={{ width: '300px' }}>
+                                        <FormControlLabel required control={<Checkbox checked={checked1} onChange={(event) => { SetChecked1(event.target.checked); SetError([]) }} />} label={<span> Hyväksyn <Link href="https://klu.fi/tietosuoja.pdf" target="_blank" rel="noreferrer">tietosuojaselosteen</Link></span>} />
+                                        <FormHelperText>{error.find(error => error.fieldName === "terms1")?.errorText}</FormHelperText>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <FormControlLabel required control={<Checkbox checked={checked2} onChange={(event) => { SetChecked2(event.target.checked); SetError([]) }} />} label={<span> Hyväksyn <Link href="https://klu.fi/tandemehdot.pdf" target="_blank" rel="noreferrer">toimitus- ja peruutusehdot</Link></span>} />
+                                        <FormHelperText>{error.find(error => error.fieldName === "terms2")?.errorText}</FormHelperText>
+                                    </FormGroup>
+                                    <FormGroup>
+                                        <FormControlLabel required control={<Checkbox checked={checked3} onChange={(event) => { SetChecked3(event.target.checked); SetError([]) }} />} label={<span> Hyväksyn <Link href="https://www.paytrail.com/kuluttaja/tietoa-maksamisesta" target="_blank" rel="noreferrer">maksuehdot</Link></span>} />
+                                        <FormHelperText>{error.find(error => error.fieldName === "terms3")?.errorText}</FormHelperText>
+                                    </FormGroup>
+
+
+                                </FormControl>
 
                                 <Typography sx={{ width: '300px', textAlign: 'start' }} variant="body2">* Pakollinen kenttä</Typography>
 
