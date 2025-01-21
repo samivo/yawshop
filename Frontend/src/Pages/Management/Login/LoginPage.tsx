@@ -1,7 +1,7 @@
 import { Box, Button, Grid2, TextField } from '@mui/material'
 import React, { ChangeEvent,  useState } from 'react'
-import { postCredentials } from '../../../Utilities/PostCredentials';
 import { useNavigate } from 'react-router-dom';
+import { ApiEndpoint, ApiV1, Method } from '../../../Utilities/ApiFetch';
 
 export interface LoginForm {
     email: string;
@@ -47,20 +47,16 @@ const LoginPage: React.FC = () => {
 
         if (!newErrors.email && !newErrors.password) {
 
-            const success = await postCredentials(loginForm);
-
-            if(success){
-
+            try {
+                await ApiV1(ApiEndpoint.Login, Method.POST, false, loginForm);
                 navigation("/dashboard");
 
-            }
-            else{
+            } catch (error) {
                 setErrors({
-                    email:"Tarkista sähköposti",
-                    password:"Tarkista salasana"
+                    email: "Tarkista sähköposti",
+                    password: "Tarkista salasana"
                 });
             }
-            
         }
 
     }

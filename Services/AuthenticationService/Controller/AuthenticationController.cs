@@ -1,15 +1,15 @@
-using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 
 namespace YawShop.Services.AuthenticationService.Controller;
 
-
+/// <summary>
+/// Used for login. Apiendpointidentity requires authenticated user.
+/// TODO: 2fa is behind auth now+
+/// </summary>
 [ApiController]
-[Route("/api/v1/auth2")]
+[Route("/api/v1/auth/public")]
 public class AuthenticationController : ControllerBase
 {
     private readonly ILogger<AuthenticationController> _logger;
@@ -26,6 +26,7 @@ public class AuthenticationController : ControllerBase
         _signInManager = signInManager;
     }
 
+    [AllowAnonymous]
     [HttpPost("check")]
     public IActionResult CheckAuthenticated([FromBody] object empty)
     {
@@ -34,6 +35,21 @@ public class AuthenticationController : ControllerBase
             return Ok();
         }
         return Unauthorized();
+    }
+
+    // Public login endpoint
+    [HttpPost("login")]
+    [AllowAnonymous] // No authentication required for login
+    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    {
+        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: true, lockoutOnFailure: false);
+
+        if (!result.Succeeded)
+        {
+            return Unauthorized(new { Message = "Invalid credentials." });
+        }
+
+        return Ok(new { Message = "Login successful." });
     }
 
     [HttpPost("logout")]

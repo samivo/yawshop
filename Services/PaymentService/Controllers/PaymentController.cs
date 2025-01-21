@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using YawShop.Services.CheckoutService;
 using YawShop.Services.StockService;
 using YawShop.Services.ClientService;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace YawShop.Services.PaymentService.Controllers;
 
@@ -30,6 +31,7 @@ public class PaymentController : ControllerBase
         _client = clientService;
     }
 
+    
     [AllowAnonymous]
     [HttpGet("callback")]
     public async Task<IActionResult> PaymentCallbackGet()
@@ -38,13 +40,22 @@ public class PaymentController : ControllerBase
         {
             var callbackResult = _payment.ValidateCallbackOrWebhook(HttpContext.Request);
 
-            await _checkout.HandlePaymentCallbackAsync(callbackResult);
+            //Since callback is validated, Ok should be returned.
+            //TODO: If payment handler fails, it should tried again later?
+            try
+            {   
+                await _checkout.HandlePaymentCallbackAsync(callbackResult);
+            }
+            catch (System.Exception ex) 
+            {
+                _logger.LogCritical("Payment callback was valid, but something went wrong while processing payment: {ex}", ex);
+            }
 
             return Ok();
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("Payment callback error: {err}", ex.ToString());
+            _logger.LogCritical("Payment callback validation error: {err}", ex);
             return StatusCode(400);
         }
     }

@@ -8,6 +8,7 @@ WORKDIR /app
 
 COPY bin/Release/net8.0/linux-x64/publish/YawShop /app/YawShop
 COPY Frontend/dist /app/Frontend/dist
+COPY appsettings.json /app
 
 RUN chmod +x /app/YawShop
 

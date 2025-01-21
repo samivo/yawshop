@@ -43,8 +43,8 @@ public class PaytrailService : IPaymentService
 
             if (!string.IsNullOrEmpty(_paytrailSettings.CallbackSuccess) && !string.IsNullOrEmpty(_paytrailSettings.CallbackCancel))
             {
-                // request.CallbackUrls.Success = _paytrailSettings.CallbackSuccess;
-                // request.CallbackUrls.Cancel = _paytrailSettings.CallbackCancel;
+                 request.CallbackUrls.Success = _paytrailSettings.CallbackSuccess;
+                 request.CallbackUrls.Cancel = _paytrailSettings.CallbackCancel;
             }
 
             var totalAmount = 0;
@@ -126,7 +126,7 @@ public class PaytrailService : IPaymentService
 
             }
 
-            var secret = Environment.GetEnvironmentVariable("PAYTRAIL_SECRET") ?? throw new InvalidOperationException("Unable to validate callback. Paytrail env variables missing.");
+            var secret = EnvVariableReader.GetVariable("PAYTRAIL_SECRET");
 
             var signature = PaytrailCrypto.CalculateHmac(secret, headers, "", headers["checkout-algorithm"]);
 
@@ -144,6 +144,7 @@ public class PaytrailService : IPaymentService
             switch (receivedPaymentStatus)
             {
                 case PaytrailPaymentStatuses.New:
+                    // The callback status from paytrail should never be "new"
                     throw new InvalidOperationException("Paytrail callback status was New. Something went wrong!");
 
                 case PaytrailPaymentStatuses.Ok:

@@ -17,19 +17,24 @@ namespace YawShop
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(new WebApplicationOptions
             {
                 WebRootPath = "Frontend/dist/",
-
             });
+
+            builder.Configuration
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddEnvironmentVariables();
 
             if (builder.Environment.IsDevelopment())
             {
                 Env.Load();
             }
-            else{
+            else
+            {
                 builder.WebHost.UseUrls("http://0.0.0.0:5000");
             }
 
@@ -53,11 +58,20 @@ namespace YawShop
                 }
             });
 
-            var test = builder.Services.AddIdentityApiEndpoints<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+            builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
+            {
+                options.Password.RequireDigit = true;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "auth_cookie";
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.SlidingExpiration = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
 
             builder.Services.AddAuthorization();
@@ -100,9 +114,9 @@ namespace YawShop
                 }
             });
 
-            builder.Services.AddTransient<IEmailSender<IdentityUser>, TestEmailer>();
+            builder.Services.AddTransient<IEmailSender<IdentityUser>, Emailer>();
 
-            builder.Services.AddScoped<IEmailer, TestEmailer>();
+            builder.Services.AddScoped<IEmailer, Emailer>();
 
             builder.Services.AddScoped<IGiftcardService, GiftcardService>();
 
@@ -131,30 +145,52 @@ namespace YawShop
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                                 policy =>
                                 {
-                                    policy.WithOrigins("http://localhost:5132", "http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                                    policy.WithOrigins("http://localhost:5132", "http://localhost:5173", "https://dev.kauppa.klu.fi").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                                 });
             });
 
+            // builder.Services.AddRateLimiter(options =>
+            // {
+            //     options.AddFixedWindowLimiter(policyName: "paymentLimiter", options =>
+            //     {
+            //         options.PermitLimit = 200;
+            //         options.Window = TimeSpan.FromSeconds(3600);
+            //         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            //         options.QueueLimit = 0;
+            //     });
+            //     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            // });
+
             var app = builder.Build();
 
-            // Apply pending migrations during startup
+            // app.UseRateLimiter();
+
             using (var scope = app.Services.CreateScope())
             {
                 try
                 {
-                    System.Console.WriteLine("Apply db migrations");
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                    dbContext.Database.Migrate(); // Applies all pending migrations    
+                    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                    await SeedDefaultUserAsync(userManager);
+
+                    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                    if (context.Database.HasPendingModelChanges())
+                    {
+                        throw new InvalidOperationException("The database model has pending changes that need to be added to a migration.");
+                    }
+
                 }
                 catch (System.Exception)
                 {
-                    System.Console.WriteLine("Database migartions failed.");
                     throw;
                 }
 
             }
 
-            app.MapGroup("/api/v1/auth").MapIdentityApi<IdentityUser>();
+            app.MapGroup("/api/v1/auth")
+            .MapIdentityApi<IdentityUser>()
+            .RequireAuthorization();
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -162,6 +198,7 @@ namespace YawShop
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
             app.UseCors(MyAllowSpecificOrigins);
 
             app.UseStaticFiles();
@@ -180,12 +217,33 @@ namespace YawShop
                 await next();
             });
 
-
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers().RequireAuthorization();
             app.MapFallbackToFile("index.html");
             app.Run();
+
+            //Remove this debug only
+            async Task SeedDefaultUserAsync(UserManager<IdentityUser> userManager)
+            {
+                var defaultUserEmail = "dev@klu.fi";
+                var defaultPassword = EnvVariableReader.GetVariable("SMTP_PASSWORD");
+
+                // Check if the default user already exists
+                if (await userManager.FindByEmailAsync(defaultUserEmail) == null)
+                {
+                    var user = new IdentityUser
+                    {
+                        UserName = defaultUserEmail,
+                        Email = defaultUserEmail,
+                        EmailConfirmed = true
+                    };
+
+                    // Create the user
+                    var result = await userManager.CreateAsync(user, defaultPassword);
+
+                }
+            }
         }
     }
 }

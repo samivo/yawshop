@@ -1,0 +1,98 @@
+name: Migrate and deploy to dev
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout code
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # 2. Set up .NET
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0
+    
+    # 3. Build the .NET app
+    - name: Build YawShop
+      run: dotnet build YawShop.csproj -c Release
+
+    # 4. Build Frontend
+    - name: Set Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+    - name: Build Frontend
+      run: |
+        cd Frontend
+        npm install
+        npm run build
+
+    # 5. Publish the .NET app
+    - name: Publish YawShop
+      run: dotnet publish YawShop.csproj -c Release -o bin/Release/net8.0/linux-x64/publish
+
+    # 6. Build Docker image
+    - name: Build Docker Image
+      run: docker build -t yawshop:latest .
+
+    # 7. Save Docker image for transfer
+    - name: Save Docker Image
+      run: docker save yawshop:latest -o yawshop.tar
+
+    # 8. Set up SSH key
+    - name: Set Up SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEV_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.DEV_SERVER }} >> ~/.ssh/known_hosts
+
+    # 9. Migrate database
+    - name: Migrate database
+      run: |
+        scp migrations.sql ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop/migrations.sql
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
+        cd /opt/stacks/yawshop &&
+        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
+
+    # 9. Transfer files to server
+    - name: Transfer files to server
+      run: |
+        scp yawshop.tar ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
+        scp docker-compose.yml ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop
+
+    # 10. Set Environment Variables and start services
+    - name: Configure Environment Variables and Start Services
+      run: |
+        ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
+        cd /opt/stacks/yawshop &&
+        # Create a .env file (keeps it on the server)
+        echo 'SMTP_HOST=${{ secrets.SMTP_HOST }}' > .env &&
+        echo 'SMTP_PORT=${{ secrets.SMTP_PORT }}' >> .env &&
+        echo 'SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}' >> .env &&
+        echo 'SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}' >> .env &&
+        echo 'SMTP_SENDER_EMAIL=${{ secrets.SMTP_SENDER_EMAIL }}' >> .env &&
+        echo 'SMTP_SENDER_NAME=${{ secrets.SMTP_SENDER_NAME }}' >> .env &&
+        echo 'DB_SERVER=${{ secrets.DB_SERVER }}' >> .env &&
+        echo 'DB_DATABASE=${{ secrets.DB_DATABASE }}' >> .env &&
+        echo 'DB_USER=${{ secrets.DB_USER }}' >> .env &&
+        echo 'DB_PASSWORD=${{ secrets.DB_PASSWORD }}' >> .env &&
+        echo 'DB_PORT=${{ secrets.DB_PORT }}' >> .env &&
+        echo 'PAYTRAIL_ACCOUNT=${{ secrets.PAYTRAIL_ACCOUNT_DEV }}' >> .env &&
+        echo 'PAYTRAIL_SECRET=${{ secrets.PAYTRAIL_SECRET_DEV }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_SUCCESS=${{ secrets.PAYTRAIL_REDIRECT_SUCCESS_DEV }}' >> .env &&
+        echo 'PAYTRAIL_REDIRECT_CANCEL=${{ secrets.PAYTRAIL_REDIRECT_CANCEL_DEV }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_SUCCESS=${{ secrets.PAYTRAIL_CALLBACK_SUCCESS_DEV }}' >> .env &&
+        echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL_DEV }}' >> .env &&
+        # Load Docker image and start services
+        docker load < yawshop.tar &&
+        docker compose down &&
+        docker compose up -d"

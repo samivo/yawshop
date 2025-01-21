@@ -6,25 +6,21 @@ import { ApiEndpoint, ApiV1, Method } from '../../Utilities/ApiFetch';
 function ProtectedRoute({ children }: { children: React.ReactElement }) {
 
   const [authState, setAuthState] = useState<'pending' | 'authenticated' | 'unauthenticated'>('pending');
-
   const navigation = useNavigate();
 
-  
   useEffect( () => {
-
     checkAuth();
 
   }, []);
 
   const checkAuth = async () => {
 
-    try {
 
+    try {
       await ApiV1(ApiEndpoint.CheckAuth, Method.GET, false);
       setAuthState("authenticated")
 
     } catch (error) {
-
       setAuthState("unauthenticated");
     }
   }
@@ -32,7 +28,6 @@ function ProtectedRoute({ children }: { children: React.ReactElement }) {
 
   if (authState === 'pending') {
    
-
     return (
       <Box sx={{
         display: 'flex',

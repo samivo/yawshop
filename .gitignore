@@ -24,6 +24,7 @@ obj/
 # Secrets and sensitive files
 appsettings.*.json
 !appsettings.json
+!appsettings.Production.json
 *.key
 
 # IDE-specific
