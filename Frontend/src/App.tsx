@@ -23,7 +23,8 @@ function App() {
           <Route path="/product/:code" element={<ProductTemplate />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path='/checkout' element={<CheckoutPage />} />
-          <Route path='/giftcard/:code' element={<GiftcardInfo />} />
+          <Route path="/giftcard/:code" element={<GiftcardInfo />} />
+          <Route path="/lahjakortti/:code" element={<GiftcardInfo />} />
           <Route path='/checkout/cancel' element={<CheckoutComplete success={false} redirectUrl='https://klu.fi'/>} />
           <Route path='/checkout/success' element={<CheckoutComplete success={true} redirectUrl='https://klu.fi'/>} />
       </Routes>

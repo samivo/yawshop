@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Grid2, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
 import lahjakortti from "./Lahjakortti_v3.svg";
 import { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ import { DateToString } from "../../../Utilities/DateToString";
 export const GiftcardInfo: React.FC = () => {
 
     const { code } = useParams<{ code: string }>();
-    const [giftcardSvg, SetGiftcardSvg] = useState<string>("");
+    const [giftcardSvg, SetGiftcardSvg] = useState<string | null>(null);
 
     useEffect(() => {
 
@@ -26,7 +26,7 @@ export const GiftcardInfo: React.FC = () => {
 
 
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching giftcard:", error);
             }
         };
 
@@ -71,7 +71,27 @@ export const GiftcardInfo: React.FC = () => {
         );
     }
     else {
-        return null;
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    width: "500px",
+                    maxWidth:'100%',
+                    justifyContent: "center",
+                    alignItems: "start",
+                    marginTop: "50px",
+                    justifySelf:'center'
+                }}
+            >
+                <Grid2 container size={12} spacing={3} sx={{padding:'10px'}}>
+                    <Typography variant="h5">Mikäli olet ostanut lahjakortin, ei hätää!</Typography>
+                    <Typography variant="h5">Päivitämme verkkokauppaa ja lahjakorttisi tulee tänne piakkoin.</Typography>
+                </Grid2>
+
+
+            </Box>
+        );
+
     }
 
 }
