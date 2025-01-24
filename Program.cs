@@ -215,7 +215,6 @@ namespace YawShop
             app.UseAuthorization();
             app.MapControllers().RequireAuthorization();
             app.MapFallbackToFile("index.html");
-            app.Logger.LogInformation("App staring");
             app.Run();
 
             //Remove this debug only
