@@ -94,6 +94,7 @@ jobs:
         echo 'PAYTRAIL_CALLBACK_CANCEL=${{ secrets.PAYTRAIL_CALLBACK_CANCEL_DEV }}' >> .env &&
         echo 'YAWSHOP_DEFAULT_USER=${{ secrets.YAWSHOP_DEFAULT_USER }}' >> .env &&
         echo 'YAWSHOP_DEFAULT_PASSWORD=${{ secrets.YAWSHOP_DEFAULT_PASSWORD}}' >> .env &&
+        echo 'SLACK=${{ secrets.SLACK_DEV}}' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose down &&

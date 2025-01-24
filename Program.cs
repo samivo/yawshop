@@ -137,7 +137,7 @@ namespace YawShop
             builder.Services.AddEndpointsApiExplorer();
 
             builder.Services.AddSwaggerGen();
-
+            
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
             builder.Services.AddCors(options =>
@@ -149,21 +149,15 @@ namespace YawShop
                                 });
             });
 
-            // builder.Services.AddRateLimiter(options =>
-            // {
-            //     options.AddFixedWindowLimiter(policyName: "paymentLimiter", options =>
-            //     {
-            //         options.PermitLimit = 200;
-            //         options.Window = TimeSpan.FromSeconds(3600);
-            //         options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            //         options.QueueLimit = 0;
-            //     });
-            //     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            // });
+            //Set slack notifications based on environment
+            var isLocalhost = Environment.GetEnvironmentVariable("LOCALHOST");
+
+            if (!String.Equals(isLocalhost, "true", StringComparison.InvariantCultureIgnoreCase))
+            {
+                builder.Logging.AddProvider(new SlackLoggerProvider());
+            }
 
             var app = builder.Build();
-
-            // app.UseRateLimiter();
 
             using (var scope = app.Services.CreateScope())
             {
