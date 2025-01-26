@@ -156,7 +156,8 @@ const ProductTemplate: React.FC = () => {
                             </ListItemIcon>
 
                             <ListItemText
-                                primary={DateToString.getTime(event.eventStart)}
+                                primary={DateToString.getDate(event.eventStart)}
+                                secondary={DateToString.getTime(event.eventStart)}
                             >
 
                             </ListItemText>
@@ -166,15 +167,13 @@ const ProductTemplate: React.FC = () => {
                             </ListItemIcon>
 
                             <ListItemText
-                                primary={DateToString.getTime(event.eventEnd)}
+                                primary={DateToString.getDate(event.eventEnd)}
+                                secondary={DateToString.getTime(event.eventEnd)}
                             >
 
                             </ListItemText>
 
-
                             <ListItemText sx={{ textAlign: 'center', marginLeft: '10px' }} primary="Tilaa" secondary={event.registrationsLeft != null ? event.registrationsLeft : "On"}></ListItemText>
-
-
 
                         </ListItemButton>
                     );

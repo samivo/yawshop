@@ -439,53 +439,6 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
                                 init={{
                                     menubar: true,
                                     plugins: 'advlist autolink lists link image charmap ',
-                                    toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | help',
-                                    content_style:
-                                        "body { font-family: roboto, Arial, sans-serif; }", // Set default content font
-                                    font_formats:
-                                        "roboto=roboto, sans-serif;" + // Add Roboto to the dropdown
-                                        "Arial=arial,helvetica,sans-serif;" +
-                                        "Courier New=courier new,courier,monospace;" +
-                                        "Georgia=georgia,palatino;" +
-                                        "Tahoma=tahoma,arial,helvetica,sans-serif;" +
-                                        "Times New Roman=times new roman,times;" +
-                                        "Verdana=verdana,geneva,sans-serif;",
-
-                                    file_picker_callback: (callback, _undefined, meta) => {
-                                        if (meta.filetype === 'image') {
-                                            const input = document.createElement('input');
-                                            input.setAttribute('type', 'file');
-                                            input.setAttribute('accept', 'image/*'); // Accept only image files
-
-                                            input.onchange = function () {
-                                                const file = input.files?.[0]; // Null-safe access to the selected file
-                                            if (!file) {
-                                              console.error('No file selected');
-                                              return;
-                                            }
-                                      
-                                            const reader = new FileReader();
-                                      
-                                            reader.onload = function (e) {
-                                              const base64 = (e.target?.result as string).split(',')[1]; // Extract Base64 data
-                                              const id = 'blobid' + new Date().getTime();
-                                      
-                                              // Access TinyMCE's blob cache
-                                              const blobCache = window.tinymce.activeEditor.editorUpload.blobCache;
-                                              const blobInfo = blobCache.create(id, file, base64);
-                                      
-                                              blobCache.add(blobInfo);
-                                      
-                                              // Provide the blob URI to the callback to insert into the editor
-                                              callback(blobInfo.blobUri(), { title: file.name });
-                                            };
-                                      
-                                            reader.readAsDataURL(file); // Read the file as a Base64 data URL
-                                          };
-                                      
-                                          input.click(); 
-                                        }
-                                    },
                                 }}
                                 apiKey="cbnlpc6pajf392214l0g75a6hl0wxj7tpc5eh6c12y7aabks"
                                 value={formData.descriptionOrInnerHtml}
@@ -495,7 +448,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
                                         descriptionOrInnerHtml: newContent,
                                     }))
                                 }
-                                
+
                             />
                         </Grid2>
 
