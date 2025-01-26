@@ -12,6 +12,7 @@ using YawShop.Services.EventService;
 using YawShop.Services.PaytrailService;
 using YawShop.Services.GiftcardService;
 using YawShop.Utilities;
+using YawShop.Utilities.CheckoutCleaner;
 
 namespace YawShop
 {
@@ -31,6 +32,7 @@ namespace YawShop
 
             if (builder.Environment.IsDevelopment())
             {
+                // loads the local .env file to net core if in localhost development
                 Env.Load();
             }
             else
@@ -38,25 +40,7 @@ namespace YawShop
                 builder.WebHost.UseUrls("http://0.0.0.0:5000");
             }
 
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            {
-                try
-                {
-                    var Server = EnvVariableReader.GetVariable("DB_SERVER");
-                    var Database = EnvVariableReader.GetVariable("DB_DATABASE");
-                    var Port = EnvVariableReader.GetVariableAsInt("DB_PORT");
-                    var User = EnvVariableReader.GetVariable("DB_USER");
-                    var Password = EnvVariableReader.GetVariable("DB_PASSWORD");
-
-                    var connectionString = $"Server={Server};Database={Database};User={User};Password={Password};Port={Port}";
-                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"SMTP cofiguration error: {ex}", ex.ToString());
-                    throw;
-                }
-            });
+            builder.Services.AddDbContext<ApplicationDbContext>();
 
             builder.Services.AddIdentityApiEndpoints<IdentityUser>(options =>
             {
@@ -114,28 +98,20 @@ namespace YawShop
                 }
             });
 
+
+            builder.Services.AddHostedService<ConsumeHostedServices>();
+            builder.Services.AddScoped<ICleanerTimerService, CleanerTimerService>(); // used by ConsumeHostService to clean up automatically more than 10 minutes old floating checkouts
             builder.Services.AddTransient<IEmailSender<IdentityUser>, Emailer>();
-
             builder.Services.AddScoped<IEmailer, Emailer>();
-
             builder.Services.AddScoped<IGiftcardService, GiftcardService>();
-
             builder.Services.AddScoped<IDiscountService, DiscountService>();
-
             builder.Services.AddScoped<IClientService, ClientService>();
-
             builder.Services.AddScoped<IProductService, ProductService>();
-
             builder.Services.AddScoped<IEventService, EventService>();
-
             builder.Services.AddScoped<IPaymentService, PaytrailService>();
-
             builder.Services.AddScoped<ICheckoutService, CheckoutService>();
-
             builder.Services.AddScoped<IStockService, StockService>();
-
             builder.Services.AddEndpointsApiExplorer();
-
             builder.Services.AddSwaggerGen();
             
             var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -185,7 +161,6 @@ namespace YawShop
             .MapIdentityApi<IdentityUser>()
             .RequireAuthorization();
 
-
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -212,9 +187,13 @@ namespace YawShop
             });
 
             app.UseAuthentication();
+
             app.UseAuthorization();
+
             app.MapControllers().RequireAuthorization();
+
             app.MapFallbackToFile("index.html");
+
             app.Run();
 
             //Remove this debug only

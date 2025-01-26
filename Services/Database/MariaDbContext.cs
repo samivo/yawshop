@@ -7,6 +7,7 @@ using YawShop.Services.DiscountService.Models;
 using YawShop.Services.ClientService.Models;
 using YawShop.Services.ProductService.Models;
 using YawShop.Services.CheckoutService.Models;
+using YawShop.Services.Database;
 
 public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
@@ -18,8 +19,14 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 
     public DbSet<CheckoutModel> Checkouts { get; set; }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :
-        base(options)
-    { }
+    public ApplicationDbContext()
+    {
+
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder options)
+    {
+        options.UseMySql(DbConnectionString.GetString(), ServerVersion.AutoDetect(DbConnectionString.GetString()));
+    }
 
 }

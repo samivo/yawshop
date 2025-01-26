@@ -96,6 +96,7 @@ jobs:
         echo 'YAWSHOP_DEFAULT_USER=${{ secrets.YAWSHOP_DEFAULT_USER }}' >> .env &&
         echo 'YAWSHOP_DEFAULT_PASSWORD=${{ secrets.YAWSHOP_DEFAULT_PASSWORD}}' >> .env &&
         echo 'SLACK=${{ secrets.SLACK_PROD}}' >> .env &&
+        echo 'CLEAN_INTERVAL_MINUTES=${{ secrets.CLEAN_INTERVAL_MINUTES}}' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose down &&
