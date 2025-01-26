@@ -44,125 +44,7 @@ public class CheckoutService : ICheckoutService
         _email = emailer;
     }
 
-    /// <summary>
-    /// Creates unified checkout object from shopping cart to payment provider.
-    /// </summary>
-    /// <param name="cart"></param>
-    /// <returns></returns>
-    public async Task<CheckoutModel> CreateCheckoutObjectsync(ShoppingCartModel cart)
-    {
-        try
-        {
-            var checkOutObject = new CheckoutModel
-            {
-                Client = cart.Client,
-                Products = new List<CheckoutItem>()
-            };
 
-            int TotalAmount = 0;
-
-            foreach (var productInfo in cart.ProductDetails)
-            {
-                var product = (await _product.FindAsNoTrackingAsync(p => p.Code == productInfo.ProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("Cant find product by code.");
-
-                //Handle events individually
-                if (product.ProductType == ProductType.Event)
-                {
-
-                    if (productInfo.EventCodes == null)
-                    {
-                        throw new InvalidOperationException("Shopping cart contains product that is event type, but event codes are missing?");
-                    }
-
-                    foreach (var eventCode in productInfo.EventCodes)
-                    {
-                        var evnt = (await _event.FindAsNoTrackingAsync(evnt => evnt.Code == eventCode)).SingleOrDefault() ?? throw new InvalidOperationException("No event found with given code");
-                        var dateString = evnt.EventStart.ToString("yyyy-MM-dd HH:mm");
-
-                        checkOutObject.Products.Add(new CheckoutItem
-                        {
-                            UnitPrice = product.PriceInMinorUnitsIncludingVat,
-                            Units = 1,
-                            VatPercentage = product.VatPercentage,
-                            ProductCode = product.Code,
-                            ProductName = product.Name + $" {dateString}",
-                            EventCode = eventCode,
-                        });
-
-                        TotalAmount += product.PriceInMinorUnitsIncludingVat;
-                    }
-                }
-                else
-                {
-                    checkOutObject.Products.Add(new CheckoutItem
-                    {
-                        UnitPrice = product.PriceInMinorUnitsIncludingVat,
-                        Units = productInfo.Quantity,
-                        VatPercentage = product.VatPercentage,
-                        ProductCode = product.Code,
-                        ProductName = product.Name
-                    });
-
-                    TotalAmount += product.PriceInMinorUnitsIncludingVat * productInfo.Quantity;
-                }
-            }
-
-            //Apply giftcard
-            if (!string.IsNullOrEmpty(cart.GiftcardCode))
-            {
-                var giftcard = (await _giftcard.FindAsNoTrackingAsync(giftcard => giftcard.Code == cart.GiftcardCode)).SingleOrDefault() ?? throw new InvalidOperationException("No giftcard found with given code");
-
-                var giftcardTargetProduct = (await _product.FindAsNoTrackingAsync(product => product.Code == giftcard.TargetProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("No product found with giftcard's target product code");
-
-                //If giftcard not value based, discount whole product price.
-                if (!giftcard.IsValueBased)
-                {
-                    giftcard.ValueLeftInMinorUnits = giftcardTargetProduct.PriceInMinorUnitsIncludingVat;
-                }
-
-                checkOutObject.Products.Add(new CheckoutItem
-                {
-                    ProductName = (await _product.FindAsNoTrackingAsync(product => product.GiftcardTargetProductCode == giftcard.TargetProductCode)).First().Name,
-                    ProductCode = giftcard.Code,
-                    UnitPrice = -giftcard.ValueLeftInMinorUnits,
-                    Units = 1,
-                    VatPercentage = giftcardTargetProduct.VatPercentage
-                });
-
-                TotalAmount -= giftcard.ValueLeftInMinorUnits;
-
-            }
-
-            //Apply discount
-            if (!string.IsNullOrEmpty(cart.DiscountCode))
-            {
-
-                var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == cart.DiscountCode)).SingleOrDefault() ?? throw new InvalidOperationException("No discount found with given code");
-                var discountProduct = (await _product.FindAsNoTrackingAsync(product => product.Code == discount.TargetProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("No product found with given code.");
-
-                checkOutObject.Products.Add(new CheckoutItem
-                {
-                    ProductName = discountProduct.Name,
-                    ProductCode = discount.Code,
-                    UnitPrice = -discount.DiscountAmountInMinorUnits,
-                    Units = 1,
-                    VatPercentage = discountProduct.VatPercentage
-                });
-
-                TotalAmount -= discount.DiscountAmountInMinorUnits;
-            }
-
-            checkOutObject.TotalAmount = TotalAmount;
-
-            return checkOutObject;
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Checkout object generation error: {err}", ex.ToString());
-            throw;
-        }
-    }
 
     public async Task<CheckoutModel?> GetSingleAsync(Expression<Func<CheckoutModel, bool>> predicate)
     {
@@ -535,6 +417,126 @@ public class CheckoutService : ICheckoutService
         catch (Exception)
         {
 
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Creates unified checkout object from shopping cart to payment provider.
+    /// </summary>
+    /// <param name="cart"></param>
+    /// <returns></returns>
+    private async Task<CheckoutModel> CreateCheckoutObjectsync(ShoppingCartModel cart)
+    {
+        try
+        {
+            var checkOutObject = new CheckoutModel
+            {
+                Client = cart.Client,
+                Products = new List<CheckoutItem>()
+            };
+
+            int TotalAmount = 0;
+
+            foreach (var productInfo in cart.ProductDetails)
+            {
+                var product = (await _product.FindAsNoTrackingAsync(p => p.Code == productInfo.ProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("Cant find product by code.");
+
+                //Handle events individually
+                if (product.ProductType == ProductType.Event)
+                {
+
+                    if (productInfo.EventCodes == null)
+                    {
+                        throw new InvalidOperationException("Shopping cart contains product that is event type, but event codes are missing?");
+                    }
+
+                    foreach (var eventCode in productInfo.EventCodes)
+                    {
+                        var evnt = (await _event.FindAsNoTrackingAsync(evnt => evnt.Code == eventCode)).SingleOrDefault() ?? throw new InvalidOperationException("No event found with given code");
+                        var dateString = evnt.EventStart.ToString("yyyy-MM-dd HH:mm");
+
+                        checkOutObject.Products.Add(new CheckoutItem
+                        {
+                            UnitPrice = product.PriceInMinorUnitsIncludingVat,
+                            Units = 1,
+                            VatPercentage = product.VatPercentage,
+                            ProductCode = product.Code,
+                            ProductName = product.Name + $" {dateString}",
+                            EventCode = eventCode,
+                        });
+
+                        TotalAmount += product.PriceInMinorUnitsIncludingVat;
+                    }
+                }
+                else
+                {
+                    checkOutObject.Products.Add(new CheckoutItem
+                    {
+                        UnitPrice = product.PriceInMinorUnitsIncludingVat,
+                        Units = productInfo.Quantity,
+                        VatPercentage = product.VatPercentage,
+                        ProductCode = product.Code,
+                        ProductName = product.Name
+                    });
+
+                    TotalAmount += product.PriceInMinorUnitsIncludingVat * productInfo.Quantity;
+                }
+            }
+
+            //Apply giftcard
+            if (!string.IsNullOrEmpty(cart.GiftcardCode))
+            {
+                var giftcard = (await _giftcard.FindAsNoTrackingAsync(giftcard => giftcard.Code == cart.GiftcardCode)).SingleOrDefault() ?? throw new InvalidOperationException("No giftcard found with given code");
+
+                var giftcardTargetProduct = (await _product.FindAsNoTrackingAsync(product => product.Code == giftcard.TargetProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("No product found with giftcard's target product code");
+
+                //If giftcard not value based, discount whole product price.
+                if (!giftcard.IsValueBased)
+                {
+                    giftcard.ValueLeftInMinorUnits = giftcardTargetProduct.PriceInMinorUnitsIncludingVat;
+                }
+
+                checkOutObject.Products.Add(new CheckoutItem
+                {
+                    ProductName = (await _product.FindAsNoTrackingAsync(product => product.GiftcardTargetProductCode == giftcard.TargetProductCode)).First().Name,
+                    ProductCode = giftcard.Code,
+                    UnitPrice = -giftcard.ValueLeftInMinorUnits,
+                    Units = 1,
+                    VatPercentage = giftcardTargetProduct.VatPercentage
+                });
+
+                TotalAmount -= giftcard.ValueLeftInMinorUnits;
+
+            }
+
+            //Apply discount
+            if (!string.IsNullOrEmpty(cart.DiscountCode))
+            {
+
+                var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == cart.DiscountCode)).SingleOrDefault() ?? throw new InvalidOperationException("No discount found with given code");
+                var discountProduct = (await _product.FindAsNoTrackingAsync(product => product.Code == discount.TargetProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("No product found with given code.");
+
+                checkOutObject.Products.Add(new CheckoutItem
+                {
+                    ProductName = discountProduct.Name,
+                    ProductCode = discount.Code,
+                    UnitPrice = -discount.DiscountAmountInMinorUnits,
+                    Units = 1,
+                    VatPercentage = discountProduct.VatPercentage
+                });
+
+                TotalAmount -= discount.DiscountAmountInMinorUnits;
+            }
+
+            checkOutObject.TotalAmount = TotalAmount;
+
+            return checkOutObject;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Checkout object generation error: {err}", ex.ToString());
             throw;
         }
     }

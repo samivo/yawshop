@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using YawShop.Services.CheckoutService.Models;
+using YawShop.Services.Database;
 using YawShop.Services.DiscountService;
 using YawShop.Services.EventService;
 using YawShop.Services.GiftcardService;
@@ -11,13 +12,9 @@ public class StockService : IStockService
 {
     private readonly ILogger<StockService> _logger;
     private readonly ApplicationDbContext _context;
-
     private readonly IGiftcardService _giftcard;
-
     private readonly IDiscountService _discount;
-
     private readonly IProductService _product;
-
     private readonly IEventService _event;
 
     public StockService(ILogger<StockService> logger, ApplicationDbContext context, IGiftcardService giftcardService, IDiscountService discountService, IProductService productService, IEventService eventService)
@@ -30,12 +27,12 @@ public class StockService : IStockService
         _event = eventService;
     }
 
-    public async Task UpdateQuantitiesAsync(string checkoutCode, bool AddQuantities)
+    public async Task UpdateQuantitiesAsync(string checkoutReference, bool AddQuantities)
     {
         try
         {
-            //Get checkout object by id
-            var checkout = await _context.Checkouts.Include(c => c.Products).SingleAsync(c => c.Reference == checkoutCode);
+            //Get checkout object by code
+            var checkout = await _context.Checkouts.Include(c => c.Products).SingleAsync(c => c.Reference == checkoutReference);
 
             await UpdateQuantitiesAsync(checkout, AddQuantities);
 
@@ -43,6 +40,7 @@ public class StockService : IStockService
         catch (Exception ex)
         {
             _logger.LogError("Failed to update product and event quantities: {err}", ex.ToString());
+            
             throw;
         }
     }
@@ -51,13 +49,11 @@ public class StockService : IStockService
     {
         try
         {
-            var checkout = checkoutModel;
+            //checkoutmode.products are checkoutItems
+            var itemCodes = checkoutModel.Products.Select(p => p.ProductCode).ToList();
+            var eventCodes = checkoutModel.Products.Select(p => p.EventCode).ToList();
 
-            //Get product and event codes that included in checkout
-            var itemCodes = checkout.Products.Select(p => p.ProductCode).ToList();
-            var eventCodes = checkout.Products.Select(p => p.EventCode).ToList();
-
-            //Get product and events by codes
+            //Get real product and event models by codes
             var products = await _product.FindAsync(p => itemCodes.Contains(p.Code));
             var events = await _event.FindAsync(p => eventCodes.Contains(p.Code));
 
@@ -70,7 +66,7 @@ public class StockService : IStockService
             foreach (var product in products)
             {
                 //Get quantity per product from checkout object
-                var quantity = checkout.Products.Where(p => p.ProductCode == product.Code).Select(p => p.Units).Single();
+                var quantity = checkoutModel.Products.Where(p => p.ProductCode == product.Code).Select(p => p.Units).Single();
 
                 //Sum checkout quantities  to original product quantities
                 if (AddQuantities)
@@ -86,7 +82,7 @@ public class StockService : IStockService
             //Update event quantities
             foreach (var singleEvent in events)
             {
-                var quantity = checkout.Products.Where(p => p.EventCode == singleEvent.Code).Select(p => p.Units).Single();
+                var quantity = checkoutModel.Products.Where(p => p.EventCode == singleEvent.Code).Select(p => p.Units).Single();
 
                 if (AddQuantities)
                 {
@@ -103,7 +99,7 @@ public class StockService : IStockService
             {
                 if (AddQuantities)
                 {
-                    giftcard.SetUsed(checkout.ClientId);
+                    giftcard.SetUsed(checkoutModel.ClientId);
                 }
                 else
                 {

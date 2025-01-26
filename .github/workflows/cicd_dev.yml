@@ -12,7 +12,8 @@ jobs:
     steps:
     # 1. Checkout code
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      
 
     # 2. Set up .NET
     - name: Set up .NET
@@ -61,7 +62,8 @@ jobs:
         scp migrations.sql ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }}:/opt/stacks/yawshop/migrations.sql
         ssh ${{ secrets.DEV_USER }}@${{ secrets.DEV_SERVER }} "
         cd /opt/stacks/yawshop &&
-        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
+        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql &&
+        rm migrations.sql -f"
 
     # 9. Transfer files to server
     - name: Transfer files to server
@@ -95,7 +97,11 @@ jobs:
         echo 'YAWSHOP_DEFAULT_USER=${{ secrets.YAWSHOP_DEFAULT_USER }}' >> .env &&
         echo 'YAWSHOP_DEFAULT_PASSWORD=${{ secrets.YAWSHOP_DEFAULT_PASSWORD}}' >> .env &&
         echo 'SLACK=${{ secrets.SLACK_DEV}}' >> .env &&
+        echo 'CLEAN_INTERVAL_MINUTES=${{ secrets.CLEAN_INTERVAL_MINUTES}}' >> .env &&
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose down &&
-        docker compose up -d"
+        docker compose up -d &&
+        docker image prune -f &&
+        rm yawshop.tar -f"
+        #Todo remove .env?
