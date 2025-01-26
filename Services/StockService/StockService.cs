@@ -11,13 +11,9 @@ public class StockService : IStockService
 {
     private readonly ILogger<StockService> _logger;
     private readonly ApplicationDbContext _context;
-
     private readonly IGiftcardService _giftcard;
-
     private readonly IDiscountService _discount;
-
     private readonly IProductService _product;
-
     private readonly IEventService _event;
 
     public StockService(ILogger<StockService> logger, ApplicationDbContext context, IGiftcardService giftcardService, IDiscountService discountService, IProductService productService, IEventService eventService)

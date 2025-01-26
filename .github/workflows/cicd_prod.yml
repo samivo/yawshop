@@ -12,7 +12,7 @@ jobs:
     steps:
     # 1. Checkout code
     - name: Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     # 2. Set up .NET
     - name: Set up .NET
@@ -61,7 +61,8 @@ jobs:
         scp migrations.sql ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }}:/opt/stacks/yawshop/migrations.sql
         ssh ${{ secrets.PROD_USER }}@${{ secrets.PROD_SERVER }} "
         cd /opt/stacks/yawshop &&
-        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql"
+        docker exec -i mariadb_yawshop mariadb -u ${{ secrets.DB_USER }} -p${{ secrets.DB_PASSWORD }} ${{ secrets.DB_DATABASE }} < migrations.sql &&
+        rm migrations.sql -f"
 
     # 9. Transfer files to server
     - name: Transfer files to server
@@ -98,4 +99,7 @@ jobs:
         # Load Docker image and start services
         docker load < yawshop.tar &&
         docker compose down &&
-        docker compose up -d"
+        docker compose up -d &&
+        docker image prune -f &&
+        rm yawshop.tar -f"
+        #Todo remove .env?

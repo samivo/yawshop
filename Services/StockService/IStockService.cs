@@ -5,7 +5,8 @@ namespace YawShop.Services.StockService;
 public interface IStockService
 {
     /// <summary>
-    /// Updates product and event quantities from checkout.
+    /// Updates product quantities and set giftcards and discounts used if AddQuantities is true.
+    /// If AddQuantities is false, reduce product quantities and set giftcards and discounts unused.
     /// </summary>
     /// <param name="checkoutCode">Checkout model id</param>
     /// <param name="AddQuantities">True to increase and false to decrease quantities. </param>
