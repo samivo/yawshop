@@ -75,7 +75,7 @@ namespace YawShop.Utilities
         <p>Hei! Olet varannut ajan tapahtumaan {productName}.</p>
         <p>Saavuthan paikalle viimeistään {eventStart:dd-MM-yyyy} klo {eventStart:HH:mm}.</p>
         <p>Tapahtumapaikan ja lisätiedot löydät tuotesivulta alla olevasta linkistä.</p>
-        <a href='https://kauppa.klu.fi/product/{productCode}' > https://kauppa.klu.fi/product/{productCode}</a>
+        <a href='https://shop.klu.fi/product/{productCode}' > https://shop.klu.fi/product/{productCode}</a>
         <br>
         <p>Mahdollisista tapahtuman muutoksista ja peruuttamisesta ilmoitetaan sähköpostitse ja mahdollisuuksien mukaan myös soittamalla.</p>
         <p>Mikäli joudut perumaan varauksesi, ole yhteydessä meihin. Yhteystiedot löytyvät osoitteesta klu.fi.</p>
