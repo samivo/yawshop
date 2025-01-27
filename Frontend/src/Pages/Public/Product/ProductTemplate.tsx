@@ -48,7 +48,7 @@ const ProductTemplate: React.FC = () => {
 
         //Get upcoming events for this product
         events = events.filter(event => event.productCode == code && (new Date(event.eventStart)) > new Date());
-        
+
         SetProducts(prods);
         SetEvents(events);
 
@@ -201,9 +201,9 @@ const ProductTemplate: React.FC = () => {
 
     const checkOut = () => {
 
-        if(!product){
+        if (!product) {
             throw new Error("Checkout button clicked but there is no product?");
-            
+
         }
 
         if (product?.productType === ProductType.Event) {
@@ -236,7 +236,7 @@ const ProductTemplate: React.FC = () => {
 
             localStorage.setItem("shop_cart", JSON.stringify(shoppingCart));
 
-            
+
             navigate("/checkout");
 
 
@@ -244,7 +244,7 @@ const ProductTemplate: React.FC = () => {
             throw error;
 
         }
-        
+
     }
 
 
@@ -254,7 +254,7 @@ const ProductTemplate: React.FC = () => {
             {product ? (
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                    <Paper elevation={0} sx={{ width: '1100px', maxWidth: '100%'}}>
+                    <Paper elevation={0} sx={{ width: '1100px', maxWidth: '100%' }}>
                         <Grid container>
 
                             <Grid container size={12} sx={{ marginTop: '30px', marginBottom: '30px', display: 'flex', justifyContent: 'center' }}>
@@ -267,17 +267,17 @@ const ProductTemplate: React.FC = () => {
                                 </Stepper>
                             </Grid>
 
-                            <Grid  size={{ xs: 12, md: 7 }} sx={{ padding: '10px' }}>
+                            <Grid size={{ xs: 12, md: 7 }} sx={{ padding: '10px' }}>
                                 <Grid size={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                                    <Avatar alt="productAvatar" sx={{ width: 300, height: 300, borderRadius: '50%' }} src={product.avatarImage}/>
+                                    <Avatar alt="productAvatar" sx={{ width: 300, height: 300, borderRadius: '50%' }} src={product.avatarImage} />
                                 </Grid>
                                 <Grid size={12} >
                                     <div style={{ width: '100%', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: product.descriptionOrInnerHtml }} />
                                 </Grid>
                             </Grid>
-                            
 
-                            <Grid container size={{ xs: 12, md: 5 }} sx={{display:'flex', justifyContent:'center'}} >
+
+                            <Grid container size={{ xs: 12, md: 5 }} sx={{ display: 'flex', justifyContent: 'center' }} >
                                 <Paper elevation={0} sx={{ padding: '10px' }}>
 
                                     <Grid container size={12} spacing={1} >
@@ -287,7 +287,7 @@ const ProductTemplate: React.FC = () => {
                                         </Grid>
 
                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                            <Typography id="productPrice" variant='h5'>{product.priceInMinorUnitsIncludingVat/100} €</Typography>
+                                            <Typography id="productPrice" variant='h5'>{product.priceInMinorUnitsIncludingVat / 100} €</Typography>
                                             <Typography id="ProductVat" variant='body1'>(Sis. Alv {product.vatPercentage} %)</Typography>
                                         </Grid>
 
@@ -379,7 +379,7 @@ const ProductTemplate: React.FC = () => {
                             </Grid>
 
                             <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                                <Typography sx={{width:'100%'}} textAlign={"center"} variant='h5'>Kuopion Laskuvarjourheilijat Ry {(new Date).getFullYear()}</Typography>
+                                <Typography sx={{ width: '100%' }} textAlign={"center"} variant='h5'>Kuopion Laskuvarjourheilijat Ry {(new Date).getFullYear()}</Typography>
                             </Grid>
 
                         </Grid>
