@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.RateLimiting;
 using YawShop.Services.ProductService.Models;
 
 namespace YawShop.Services.ProductService.Controllers;
@@ -36,16 +35,10 @@ public class ProductController : ControllerBase
         }
     }
 
-    // [EnableRateLimiting("paymentLimiter")]
     [AllowAnonymous]
     [HttpGet("public")]
     public async Task<IActionResult> GetAllPublic()
     {
-        /*
-        This is public api to get all available products. Its important to validate each product for availability and
-        return list of object where [notPublic] properties are removed.
-        */
-
         try
         {
             var products = await _product.FindAsNoTrackingAsync(product => product.IsActive);
@@ -64,7 +57,7 @@ public class ProductController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("Failed to get public products: {err}", ex.ToString());
+            _logger.LogError("Failed to get public products: {err}", ex.ToString());
             return StatusCode(400, "No products found.");
         }
     }

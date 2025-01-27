@@ -52,9 +52,12 @@ public class AdditionalClientFields
     public int ClientModelId { get; set; }
 
     [NoApiUpdate]
+    [MinLength(2)]
+    [MaxLength(30)]
     public required string FieldName { get; set; }
 
     [NoApiUpdate]
+    [MaxLength(300)]
     public string? FieldValue { get; set; }
 
     [NoApiUpdate]

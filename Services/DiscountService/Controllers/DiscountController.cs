@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using YawShop.Services.DiscountService;
@@ -82,8 +83,9 @@ public class DiscountController : ControllerBase
 
     public class ValidateBody
     {
-        public required string discountCode { get; set; }
-        public required string[] productCodes { get; set; }
+        [MaxLength(50)]
+        public required string DiscountCode { get; set; }
+        public required string[] ProductCodes { get; set; }
     }
 
     [AllowAnonymous]
@@ -93,14 +95,14 @@ public class DiscountController : ControllerBase
         try
         {
 
-            var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == body.discountCode)).Single();
+            var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == body.DiscountCode)).Single();
 
-            if (!string.Equals(discount.Code.ToUpper(), body.discountCode.ToUpper()))
+            if (!string.Equals(discount.Code.ToUpper(), body.DiscountCode.ToUpper()))
             {
                 return StatusCode(400, "Invalid code.");
             }
 
-            if (discount.IsValid() && body.productCodes.Contains(discount.TargetProductCode))
+            if (discount.IsValid() && body.ProductCodes.Contains(discount.TargetProductCode))
             {
                 return Ok(discount.Public());
             }

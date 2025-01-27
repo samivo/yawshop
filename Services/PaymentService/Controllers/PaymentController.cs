@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using YawShop.Services.CheckoutService;
 using YawShop.Services.StockService;
 using YawShop.Services.ClientService;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace YawShop.Services.PaymentService.Controllers;
 
@@ -15,20 +14,12 @@ public class PaymentController : ControllerBase
     private readonly ILogger<PaymentController> _logger;
     private readonly ICheckoutService _checkout;
     private readonly IPaymentService _payment;
-    private readonly IStockService _stock;
-
-    //test
-    private readonly ApplicationDbContext _context;
-    private readonly IClientService _client;
 
     public PaymentController(ILogger<PaymentController> logger, ICheckoutService checkoutService, IPaymentService paymentService, IStockService stockService, ApplicationDbContext applicationDbContext, IClientService clientService)
     {
         _logger = logger;
         _checkout = checkoutService;
         _payment = paymentService;
-        _stock = stockService;
-        _context = applicationDbContext;
-        _client = clientService;
     }
 
     
@@ -48,7 +39,7 @@ public class PaymentController : ControllerBase
             }
             catch (System.Exception ex) 
             {
-                _logger.LogCritical("Payment callback was valid, but something went wrong while processing payment: {ex}", ex);
+                _logger.LogCritical("The payment callback was valid, but something went wrong while processing the payment: {ex}", ex);
             }
 
             return Ok();
@@ -56,7 +47,7 @@ public class PaymentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogCritical("Payment callback validation error: {err}", ex);
-            return StatusCode(400);
+            return StatusCode(400, "Invalid callback");
         }
     }
 
