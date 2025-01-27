@@ -37,19 +37,35 @@ const ProductTemplate: React.FC = () => {
     const [products, SetProducts] = useState<ProductModelPublic[]>();
     const [product, SetProduct] = useState<ProductModelPublic>();
     const [events, SetEvents] = useState<EventModelPublicModel[]>();
-    const [selectedDate, SetSelectedDate] = useState(new Date);
+    const [selectedDate, SetSelectedDate] = useState<Date>(new Date);
     const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublicModel[] | undefined>();
     const [selectedEvent, SetSelectedEvent] = useState<EventModelPublicModel | null>(null);
 
     const fetch = async () => {
 
-        var prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
-        var events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
+        let prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
+        let events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
 
-        events = events.filter(event => event.productCode == code);
-
+        //Get upcoming events for this product
+        events = events.filter(event => event.productCode == code && (new Date(event.eventStart)) > new Date());
+        
         SetProducts(prods);
         SetEvents(events);
+
+        //Prechoose the first available event
+        if (events.length > 0) {
+
+            //Sort events by start date
+            events = events.sort((a, b) => (new Date(a.eventStart)).getTime() - (new Date(b.eventStart)).getTime());
+
+            let event = events.find(event => event.status === EventStatus.Available);
+
+            if (event) {
+                SetSelectedDate(new Date(event.eventStart));
+                SetSelectedEvent(event);
+            }
+        }
+
     };
 
     useEffect(() => {
@@ -128,7 +144,6 @@ const ProductTemplate: React.FC = () => {
 
     const EventList = () => {
 
-
         return (
             <List dense={true}
             >
@@ -143,8 +158,8 @@ const ProductTemplate: React.FC = () => {
                                 borderRadius: '10px',
                                 borderColor: event.status === EventStatus.Available ? "green" : "red",
                                 marginBottom: '5px',
-                                //backgroundColor: event.code === selectedEvent?.code ? "lightgreen" : "",
-                                borderWidth: event.code === selectedEvent?.code ? "4px" : "1px",
+                                //backgroundColor: event.code === selectedEvent?.code ? "" : "",
+                                borderWidth: event.code === selectedEvent?.code ? "2px" : "1px",
                             }}
                             disabled={event.status === EventStatus.Available ? false : true}
                             onClick={() => { SetSelectedEvent(event) }}
@@ -306,15 +321,23 @@ const ProductTemplate: React.FC = () => {
                                                 <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
                                                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={locale}>
-                                                        <DateCalendar disablePast={true} value={selectedDate} onChange={(newValue) => SetSelectedDate(newValue)} slots={{ day: CustomDateSlot }} />
+                                                        <DateCalendar
+                                                            disablePast={true}
+                                                            value={selectedDate}
+                                                            onChange={(newValue) => {
+                                                                SetSelectedDate(newValue);
+                                                                SetSelectedEvent(null);
+                                                            }}
+                                                            slots={{ day: CustomDateSlot }}
+                                                        />
                                                     </LocalizationProvider>
 
                                                 </Grid>
 
-                                                {eventsInSelectedDate && (
+                                                {eventsInSelectedDate ? (
                                                     <>
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                            <Typography variant='h5'>Valitse aika</Typography>
+                                                            <Typography variant='h5'>Valitse tapahtuma</Typography>
                                                         </Grid>
 
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -323,6 +346,10 @@ const ProductTemplate: React.FC = () => {
 
                                                     </>
 
+                                                ) : (
+                                                    <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                        <Typography variant='h5'>Ei tapahtumia {DateToString.getDate(selectedDate)}</Typography>
+                                                    </Grid>
                                                 )}
 
                                                 {selectedEvent && (
@@ -337,7 +364,7 @@ const ProductTemplate: React.FC = () => {
                                                         </Grid>
 
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px', marginBottom: '20px' }}>
-                                                            <Button endIcon={<ArrowForwardIcon />} variant="contained" onClick={checkOut}>Kassalle</Button>
+                                                            <Button size='large' endIcon={<ArrowForwardIcon />} variant="contained" onClick={checkOut}>Kassalle</Button>
                                                         </Grid>
 
                                                     </Grid>
