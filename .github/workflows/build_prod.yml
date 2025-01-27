@@ -1,4 +1,4 @@
-name: Migrate and deploy to production
+name: Build and deploy prod
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
 
     # 2. Set up .NET
     - name: Set up .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0
     
@@ -26,7 +26,7 @@ jobs:
 
     # 4. Build Frontend
     - name: Set Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 20
     - name: Build Frontend

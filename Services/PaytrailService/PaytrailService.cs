@@ -177,7 +177,7 @@ public class PaytrailService : IPaymentService
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("Paytrail callback verification error: {err}", ex.ToString());
+            _logger.LogCritical("Paytrail callback validation error: {err}", ex.ToString());
             throw;
         }
     }

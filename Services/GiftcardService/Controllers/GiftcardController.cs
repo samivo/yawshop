@@ -38,9 +38,11 @@ public class GiftcardController : ControllerBase
     [HttpGet("public/{giftcardCode}")]
     public async Task<IActionResult> GetPublic(string giftcardCode)
     {
-        /*
-        This is public endpoint! Use public() method to exclude properties mark as [notPublic] attribute
-        */
+        //No longer than 50 char codes should exist
+        if (giftcardCode.Length >= 50)
+        {
+            return StatusCode(400, "No giftcard found.");
+        }
 
         try
         {
@@ -50,7 +52,7 @@ public class GiftcardController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogCritical("Failed to get giftcard {err}", ex.ToString());
+            _logger.LogInformation("No giftcar found {err}", ex);
             return StatusCode(400, "No giftcard found.");
         }
     }
