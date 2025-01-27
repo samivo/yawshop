@@ -37,19 +37,35 @@ const ProductTemplate: React.FC = () => {
     const [products, SetProducts] = useState<ProductModelPublic[]>();
     const [product, SetProduct] = useState<ProductModelPublic>();
     const [events, SetEvents] = useState<EventModelPublicModel[]>();
-    const [selectedDate, SetSelectedDate] = useState(new Date);
+    const [selectedDate, SetSelectedDate] = useState<Date>(new Date);
     const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublicModel[] | undefined>();
     const [selectedEvent, SetSelectedEvent] = useState<EventModelPublicModel | null>(null);
 
     const fetch = async () => {
 
-        var prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
-        var events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
+        let prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
+        let events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
 
-        events = events.filter(event => event.productCode == code);
+        //Get upcoming events for this product
+        events = events.filter(event => event.productCode == code && (new Date(event.eventStart)) > new Date());
 
         SetProducts(prods);
         SetEvents(events);
+
+        //Prechoose the first available event
+        if (events.length > 0) {
+
+            //Sort events by start date
+            events = events.sort((a, b) => (new Date(a.eventStart)).getTime() - (new Date(b.eventStart)).getTime());
+
+            let event = events.find(event => event.status === EventStatus.Available);
+
+            if (event) {
+                SetSelectedDate(new Date(event.eventStart));
+                SetSelectedEvent(event);
+            }
+        }
+
     };
 
     useEffect(() => {
@@ -128,7 +144,6 @@ const ProductTemplate: React.FC = () => {
 
     const EventList = () => {
 
-
         return (
             <List dense={true}
             >
@@ -143,8 +158,8 @@ const ProductTemplate: React.FC = () => {
                                 borderRadius: '10px',
                                 borderColor: event.status === EventStatus.Available ? "green" : "red",
                                 marginBottom: '5px',
-                                //backgroundColor: event.code === selectedEvent?.code ? "lightgreen" : "",
-                                borderWidth: event.code === selectedEvent?.code ? "4px" : "1px",
+                                //backgroundColor: event.code === selectedEvent?.code ? "" : "",
+                                borderWidth: event.code === selectedEvent?.code ? "2px" : "1px",
                             }}
                             disabled={event.status === EventStatus.Available ? false : true}
                             onClick={() => { SetSelectedEvent(event) }}
@@ -186,9 +201,9 @@ const ProductTemplate: React.FC = () => {
 
     const checkOut = () => {
 
-        if(!product){
+        if (!product) {
             throw new Error("Checkout button clicked but there is no product?");
-            
+
         }
 
         if (product?.productType === ProductType.Event) {
@@ -221,7 +236,7 @@ const ProductTemplate: React.FC = () => {
 
             localStorage.setItem("shop_cart", JSON.stringify(shoppingCart));
 
-            
+
             navigate("/checkout");
 
 
@@ -229,7 +244,7 @@ const ProductTemplate: React.FC = () => {
             throw error;
 
         }
-        
+
     }
 
 
@@ -239,7 +254,7 @@ const ProductTemplate: React.FC = () => {
             {product ? (
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                    <Paper elevation={0} sx={{ width: '1100px', maxWidth: '100%'}}>
+                    <Paper elevation={0} sx={{ width: '1100px', maxWidth: '100%' }}>
                         <Grid container>
 
                             <Grid container size={12} sx={{ marginTop: '30px', marginBottom: '30px', display: 'flex', justifyContent: 'center' }}>
@@ -252,17 +267,17 @@ const ProductTemplate: React.FC = () => {
                                 </Stepper>
                             </Grid>
 
-                            <Grid  size={{ xs: 12, md: 7 }} sx={{ padding: '10px' }}>
+                            <Grid size={{ xs: 12, md: 7 }} sx={{ padding: '10px' }}>
                                 <Grid size={12} sx={{ display: 'flex', justifyContent: 'center' }}>
-                                    <Avatar alt="productAvatar" sx={{ width: 300, height: 300, borderRadius: '50%' }} src={product.avatarImage}/>
+                                    <Avatar alt="productAvatar" sx={{ width: 300, height: 300, borderRadius: '50%' }} src={product.avatarImage} />
                                 </Grid>
                                 <Grid size={12} >
                                     <div style={{ width: '100%', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: product.descriptionOrInnerHtml }} />
                                 </Grid>
                             </Grid>
-                            
 
-                            <Grid container size={{ xs: 12, md: 5 }} sx={{display:'flex', justifyContent:'center'}} >
+
+                            <Grid container size={{ xs: 12, md: 5 }} sx={{ display: 'flex', justifyContent: 'center' }} >
                                 <Paper elevation={0} sx={{ padding: '10px' }}>
 
                                     <Grid container size={12} spacing={1} >
@@ -272,7 +287,7 @@ const ProductTemplate: React.FC = () => {
                                         </Grid>
 
                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                            <Typography id="productPrice" variant='h5'>{product.priceInMinorUnitsIncludingVat/100} €</Typography>
+                                            <Typography id="productPrice" variant='h5'>{product.priceInMinorUnitsIncludingVat / 100} €</Typography>
                                             <Typography id="ProductVat" variant='body1'>(Sis. Alv {product.vatPercentage} %)</Typography>
                                         </Grid>
 
@@ -306,15 +321,23 @@ const ProductTemplate: React.FC = () => {
                                                 <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
 
                                                     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={locale}>
-                                                        <DateCalendar disablePast={true} value={selectedDate} onChange={(newValue) => SetSelectedDate(newValue)} slots={{ day: CustomDateSlot }} />
+                                                        <DateCalendar
+                                                            disablePast={true}
+                                                            value={selectedDate}
+                                                            onChange={(newValue) => {
+                                                                SetSelectedDate(newValue);
+                                                                SetSelectedEvent(null);
+                                                            }}
+                                                            slots={{ day: CustomDateSlot }}
+                                                        />
                                                     </LocalizationProvider>
 
                                                 </Grid>
 
-                                                {eventsInSelectedDate && (
+                                                {eventsInSelectedDate ? (
                                                     <>
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                                                            <Typography variant='h5'>Valitse aika</Typography>
+                                                            <Typography variant='h5'>Valitse tapahtuma</Typography>
                                                         </Grid>
 
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -323,6 +346,10 @@ const ProductTemplate: React.FC = () => {
 
                                                     </>
 
+                                                ) : (
+                                                    <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                                        <Typography variant='h5'>Ei tapahtumia {DateToString.getDate(selectedDate)}</Typography>
+                                                    </Grid>
                                                 )}
 
                                                 {selectedEvent && (
@@ -337,7 +364,7 @@ const ProductTemplate: React.FC = () => {
                                                         </Grid>
 
                                                         <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px', marginBottom: '20px' }}>
-                                                            <Button endIcon={<ArrowForwardIcon />} variant="contained" onClick={checkOut}>Kassalle</Button>
+                                                            <Button size='large' endIcon={<ArrowForwardIcon />} variant="contained" onClick={checkOut}>Kassalle</Button>
                                                         </Grid>
 
                                                     </Grid>
@@ -352,7 +379,7 @@ const ProductTemplate: React.FC = () => {
                             </Grid>
 
                             <Grid size={12} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', marginBottom: '20px' }}>
-                                <Typography sx={{width:'100%'}} textAlign={"center"} variant='h5'>Kuopion Laskuvarjourheilijat Ry {(new Date).getFullYear()}</Typography>
+                                <Typography sx={{ width: '100%' }} textAlign={"center"} variant='h5'>Kuopion Laskuvarjourheilijat Ry {(new Date).getFullYear()}</Typography>
                             </Grid>
 
                         </Grid>
