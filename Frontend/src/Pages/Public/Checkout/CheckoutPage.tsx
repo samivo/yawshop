@@ -338,8 +338,9 @@ export const CheckoutPage: React.FC = () => {
             if (result.href === "success") {
                 window.location.href = "/checkout/success";
             }
-            
-            window.location.href = result.href;
+            else{
+                window.location.href = result.href;
+            }
 
         } catch (error) {
             console.log(error);
