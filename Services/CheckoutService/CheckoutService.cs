@@ -105,7 +105,7 @@ public class CheckoutService : ICheckoutService
             await _context.Checkouts.AddAsync(checkoutObject);
             await _context.SaveChangesAsync();
 
-            //To prevent race conditions. Still not atomic?
+            //To prevent race conditions. Still not atomic? TODO transactions and optimistic concurrency
             await VerifyShoppingCartAsync(cart);
 
             await _stock.UpdateQuantitiesAsync(checkoutObject, true);
@@ -529,7 +529,15 @@ public class CheckoutService : ICheckoutService
                 TotalAmount -= discount.DiscountAmountInMinorUnits;
             }
 
-            checkOutObject.TotalAmount = TotalAmount;
+            if (TotalAmount < 0)
+            {
+                checkOutObject.TotalAmount = 0;
+            }
+            else
+            {
+                checkOutObject.TotalAmount = TotalAmount;
+            }
+
 
             return checkOutObject;
 

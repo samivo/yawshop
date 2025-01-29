@@ -1,4 +1,4 @@
 
 export interface CheckoutResponse{
-    href:"",
+    href: string;
 }

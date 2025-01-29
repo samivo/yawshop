@@ -177,6 +177,11 @@ const CheckoutSummary: React.FC<Props> = (props) => {
         }
     });
 
+    //Prevent negative sum
+    if (totalSum < 0) {
+        totalSum = 0;
+    }
+
     return (
         <Typography sx={props.sx} variant="h5">{`Yhteensä ${totalSum / 100} €`}</Typography>
     );
@@ -328,6 +333,11 @@ export const CheckoutPage: React.FC = () => {
             };
 
             let result: CheckoutResponse = await ApiV1(ApiEndpoint.Checkout, Method.POST, true, shoppingCart);
+            
+            //If the payment is cleared without payment, redirect to success page
+            if (result.href === "success") {
+                window.location.href = "/checkout/success";
+            }
             
             window.location.href = result.href;
 
