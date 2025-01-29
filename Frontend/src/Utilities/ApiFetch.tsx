@@ -17,16 +17,13 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
             throw new Error("Jotain meni pieleen.");
         }
 
-        //Login post does not return json body
-        if(endpoint === ApiEndpoint.Login){
+        const contentType = response.headers.get("content-type") || "";
 
-            if (response.ok) {
-                return "Ok";
-            }
+        if (contentType.includes("application/json")) {
+            return response.json();
+        } else {
+            return response.text();
         }
-
-        const data = await response.json();
-        return data;
 
     } catch (error) {
 

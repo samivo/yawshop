@@ -17,13 +17,11 @@ namespace YawShop.Utilities
         /// <returns></returns>
         public static TextPart GetEmailBody(CheckoutModel checkout)
         {
-            var total = 0;
             var productListHtml = new StringBuilder();
 
             productListHtml.Append("<ul>");
             foreach (var product in checkout.Products)
             {
-                total += product.UnitPrice;
                 productListHtml.Append(
 
                     $"<li>{product.ProductName} {product.UnitPrice / 100} € {product.Units} kpl.</li>"
@@ -90,7 +88,7 @@ namespace YawShop.Utilities
                     <h3>Kiitos asioinnista {checkout.Client.FirstName}.</h3>
                     <br>
                     {productListHtml}
-                    <p>Yhteensä {total / 100} €</p
+                    <p>Yhteensä {checkout.TotalAmount / 100} €</p
                     <br>
                     <p>Viite: {checkout.TransactionId}</p>
                     <br>
