@@ -28,7 +28,7 @@ public class CheckoutController : ControllerBase
         try
         {
             var href = await _checkout.ProcessCart(shoppingCart);
-            return Ok(JsonSerializer.Serialize(new { href }));
+            return Ok(new { href });
         }
         catch (Exception ex)
         {
