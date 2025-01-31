@@ -5,6 +5,12 @@ namespace YawShop.Services.CheckoutService;
 
 public interface ICheckoutService
 {
+    /// <summary>
+    /// Finds checkouts matching predicate
+    /// </summary>
+    /// <param name="predicate"></param>
+    /// <returns>List of checkoutmodels</returns>
+    public Task<List<CheckoutModel>> GetAsync(Expression<Func<CheckoutModel, bool>> predicate);
 
     /// <summary>
     /// Updates checkout by transaction id.

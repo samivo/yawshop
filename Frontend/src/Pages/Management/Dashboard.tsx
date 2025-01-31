@@ -14,6 +14,8 @@ import EventIcon from '@mui/icons-material/Event';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import DiscountIcon from '@mui/icons-material/Discount';
 import ProductList from './Products/ProductList';
+import OrderList from './Orders/OrderList';
+import ErrorBoundary from '../../Utilities/ErrorBoundary';
 
 const NAVIGATION: Navigation = [
   {
@@ -101,11 +103,20 @@ const demoTheme = createTheme({
 
 function DashboardPage({ pathname }: { pathname: string }) {
 
-    switch (pathname) {
-        case "/products":
-            return (<ProductList />);
-    }
-
+    return (
+        <ErrorBoundary fallback={<Typography>An error occurred while rendering this page.</Typography>}>
+            {(() => {
+                switch (pathname) {
+                    case "/products":
+                        return (<ProductList />);
+                    case "/orders":
+                        return (<OrderList />);
+                    default:
+                        return null;
+                }
+            })()}
+        </ErrorBoundary>
+    );
 }
 
 function CustomAppTitle() {

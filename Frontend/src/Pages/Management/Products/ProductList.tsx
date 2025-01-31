@@ -134,13 +134,14 @@ export default function ProductList() {
       type:'string',
       width:120,
       valueGetter: (_value : any, row: ProductModel) => {
-
+        if (!row) {
+          return "";
+        }
         if(row.quantityTotal == null){
           return row.quantityUsed +" / "+ "-";
         }
         return row.quantityUsed + " / "+row.quantityTotal;
       }
-      
     },
     {
       field: 'isActive',

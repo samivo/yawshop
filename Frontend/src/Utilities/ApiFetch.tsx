@@ -9,14 +9,14 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
                 'Content-Type': 'application/json',
             },
             credentials: publicApi ? "omit" : "include",
-            body: fetchBody ? JSON.stringify(fetchBody) : undefined,
+            body: (method === Method.POST || method === Method.PUT || method === Method.DELETE) ? JSON.stringify(fetchBody) : undefined,
         });
 
-        
         if (!response.ok) {
-            throw new Error("Jotain meni pieleen.");
+            const errorData = await response.json();
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
-
+        console.log("API Response Headers:", response.headers);
         const contentType = response.headers.get("content-type") || "";
 
         if (contentType.includes("application/json")) {
@@ -26,14 +26,18 @@ export async function ApiV1(endpoint: ApiEndpoint, method: Method, publicApi: bo
         }
 
     } catch (error) {
-
         console.error('Api fetch error:', error);
+        console.error('Api fetch error details:', error.message, error.stack);
         throw error; // Rethrow the error to handle it in the caller function
-
     }
 }
 
-export enum ApiEndpoint {
+export {
+    ApiEndpoint,
+    Method
+}
+
+enum ApiEndpoint {
     Product = "/api/v1/product",
     Event = "/api/v1/event",
     Auth = "/api/v1/auth",
@@ -41,10 +45,11 @@ export enum ApiEndpoint {
     Checkout = "/api/v1/checkout",
     CheckAuth = "/api/v1/auth/manage/info",
     Login = "/api/v1/auth/public/login",
-    Giftcard = "/api/v1/giftcard"
+    Giftcard = "/api/v1/giftcard",
+    Orders = "/api/v1/checkout/all"
 }
 
-export enum Method {
+enum Method {
     GET = "GET",
     POST = "POST",
     PUT = "PUT",

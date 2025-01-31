@@ -17,7 +17,8 @@ namespace BackendApp.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64)
+                .HasAnnotation("Relational:MigrationId", "20241212131057_InitialMigration");
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
@@ -252,7 +253,7 @@ namespace BackendApp.Migrations
 
                     b.HasIndex("CheckoutModelId");
 
-                    b.ToTable("CheckoutItem", (string)null);
+                    b.ToTable("CheckoutItem");
                 });
 
             modelBuilder.Entity("YawShop.Services.CheckoutService.Models.CheckoutModel", b =>
@@ -294,12 +295,13 @@ namespace BackendApp.Migrations
                     b.Property<string>("TransactionId")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("UpdatetAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<DateTime>("updatetAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("updatetAt");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Checkouts", (string)null);
+                    b.ToTable("Checkouts");
                 });
 
             modelBuilder.Entity("YawShop.Services.ClientService.Models.AdditionalClientFields", b =>
@@ -327,7 +329,7 @@ namespace BackendApp.Migrations
 
                     b.HasIndex("ClientModelId");
 
-                    b.ToTable("AdditionalClientFields", (string)null);
+                    b.ToTable("AdditionalClientFields");
                 });
 
             modelBuilder.Entity("YawShop.Services.ClientService.Models.ClientModel", b =>
@@ -365,7 +367,7 @@ namespace BackendApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clients");
                 });
 
             modelBuilder.Entity("YawShop.Services.DiscountService.Models.DiscountModel", b =>
@@ -409,7 +411,7 @@ namespace BackendApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Discounts", (string)null);
+                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("YawShop.Services.EventService.Models.EventModel", b =>
@@ -451,7 +453,7 @@ namespace BackendApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Events", (string)null);
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("YawShop.Services.GiftcardService.Models.GiftcardModel", b =>
@@ -500,7 +502,7 @@ namespace BackendApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Giftcards", (string)null);
+                    b.ToTable("Giftcards");
                 });
 
             modelBuilder.Entity("YawShop.Services.ProductService.Models.ProductModel", b =>
@@ -584,7 +586,7 @@ namespace BackendApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("YawShop.Services.ProductService.Models.ProductSpesificClientFields", b =>
@@ -619,7 +621,7 @@ namespace BackendApp.Migrations
 
                     b.HasIndex("ProductModelId");
 
-                    b.ToTable("ProductSpesificClientFields", (string)null);
+                    b.ToTable("ProductSpesificClientFields");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

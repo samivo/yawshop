@@ -60,6 +60,58 @@ public class CheckoutService : ICheckoutService
         }
     }
 
+    public async Task<List<CheckoutModel>> GetAsync(Expression<Func<CheckoutModel, bool>> predicate)
+    {
+        try
+        {
+            _logger.LogInformation("Starting GetAsync for checkouts with predicate: {predicate}", predicate.ToString());
+            
+            var query = _context.Checkouts
+                .AsNoTracking()
+                .Include(c => c.Products);
+                
+            _logger.LogInformation("Executing database query");
+            var checkouts = await query.Where(predicate).ToListAsync();
+            _logger.LogInformation($"Database returned {checkouts.Count} checkouts");
+
+            if (!checkouts.Any())
+            {
+                _logger.LogInformation("No checkouts found in database");
+                return new List<CheckoutModel>();
+            }
+
+            _logger.LogInformation("Loading client data for checkouts");
+            var clientIds = checkouts.Select(c => c.ClientId).Distinct().ToList();
+            _logger.LogInformation($"Found {clientIds.Count} unique client IDs");
+
+            var clients = await _client.GetAsync(c => clientIds.Contains(c.Id));
+            _logger.LogInformation($"Loaded {clients.Count} clients from database");
+
+            var clientDict = clients.ToDictionary(c => c.Id);
+
+            foreach (var checkout in checkouts)
+            {
+                if (clientDict.TryGetValue(checkout.ClientId, out var client))
+                {
+                    checkout.Client = client;
+                    _logger.LogInformation($"Mapped client to checkout {checkout.Reference}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Client {checkout.ClientId} not found for checkout {checkout.Reference}");
+                }
+            }
+
+            _logger.LogInformation($"Returning {checkouts.Count} checkouts with client data");
+            return checkouts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get checkouts: {err}", ex.ToString());
+            throw;
+        }
+    }
+
     /// <summary>
     /// Processes the cart and init payment
     /// </summary>
@@ -309,7 +361,7 @@ public class CheckoutService : ICheckoutService
             }
 
             checkout.PaymentStatus = callbackResult.PaymentStatus;
-            checkout.UpdatetAt = DateTime.Now;
+            checkout.updatetAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
 

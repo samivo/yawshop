@@ -7,6 +7,7 @@ import { CheckoutPage } from './Pages/Public/Checkout/CheckoutPage';
 import { lazy } from 'react';
 import { CheckoutComplete } from './Pages/Public/Checkout/CheckoutComplete';
 import { GiftcardInfo } from './Pages/Public/Giftcard/GiftcardInfo';
+import OrderList from './Pages/Management/Orders/OrderList';
 
 const DashboardLazy : any = lazy(() => import('./Pages/Management/Dashboard'));
 
@@ -27,6 +28,11 @@ function App() {
           <Route path="/lahjakortti/:code" element={<GiftcardInfo />} />
           <Route path='/checkout/cancel' element={<CheckoutComplete success={false} redirectUrl='https://klu.fi'/>} />
           <Route path='/checkout/success' element={<CheckoutComplete success={true} redirectUrl='https://klu.fi'/>} />
+          <Route path="/orders" element={
+            <ProtectedRoute>
+              <OrderList />
+            </ProtectedRoute>
+          } />
       </Routes>
     </BrowserRouter>
   )

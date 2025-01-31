@@ -80,3 +80,4 @@ coverage/
 *.tsbuildinfo
 *.vscode/*
 
+.aider*

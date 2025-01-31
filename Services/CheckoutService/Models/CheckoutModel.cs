@@ -64,7 +64,8 @@ public class CheckoutModel
 
     [NoApiUpdate]
     [NotPublic]
-    public DateTime UpdatetAt { get; set; } = DateTime.Now;
+    [Column("updatedAt")]
+    public DateTime updatetAt { get; set; } = DateTime.Now;
 
     [NotPublic]
     [NoApiUpdate]

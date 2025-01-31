@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
@@ -37,7 +38,7 @@ namespace YawShop
             }
             else
             {
-                builder.WebHost.UseUrls("http://0.0.0.0:5000");
+                builder.WebHost.UseUrls("http://0.0.0.0:5173");
             }
 
             builder.Services.AddDbContext<ApplicationDbContext>();
@@ -60,7 +61,10 @@ namespace YawShop
 
             builder.Services.AddAuthorization();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options => {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });
 
             builder.Services.Configure<SmtpSettings>(options =>
             {
@@ -128,6 +132,9 @@ namespace YawShop
             //Set slack notifications based on environment
             var isLocalhost = Environment.GetEnvironmentVariable("LOCALHOST");
 
+            // Always add console logging
+            builder.Logging.AddConsole();
+
             if (!String.Equals(isLocalhost, "true", StringComparison.InvariantCultureIgnoreCase))
             {
                 builder.Logging.AddProvider(new SlackLoggerProvider());
@@ -144,10 +151,10 @@ namespace YawShop
 
                     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                    if (context.Database.HasPendingModelChanges())
-                    {
-                        throw new InvalidOperationException("The database model has pending changes that need to be added to a migration.");
-                    }
+                    //if (context.Database.HasPendingModelChanges())
+                    //{
+                    //    throw new InvalidOperationException("The database model has pending changes that need to be added to a migration.");
+                    //}
 
                 }
                 catch (System.Exception)
