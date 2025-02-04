@@ -24,6 +24,9 @@ public class ProductService : IProductService
     {
         try
         {
+            //Assign new product code
+            product.Code = Guid.NewGuid().ToString();
+
             //Check there is no duplicates
             if (await _context.Products.AnyAsync(p => p.Code == product.Code))
             {
