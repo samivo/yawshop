@@ -1,4 +1,4 @@
-import { Avatar, Divider, IconButton, List, ListItem, ListItemAvatar, ListItemText, SxProps } from "@mui/material";
+import { Avatar, IconButton, List, ListItem, ListItemAvatar, ListItemText, SxProps } from "@mui/material";
 import { ShoppingCartItem } from "../../../Utilities/ShoppingCartItem";
 import { ProductType } from "../../../Models/ProductModel";
 import { DateToString } from "../../../Utilities/DateToString";
