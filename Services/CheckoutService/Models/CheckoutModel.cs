@@ -93,6 +93,8 @@ public class CheckoutItem
     public required string ProductCode { get; set; }
     public required string ProductName { get; set; }
     public string? EventCode { get; set; }
+    public string? DiscountCode { get; set; }
+    public string? GiftcardCode { get; set; }
 }
 
 public enum PaymentStatus
