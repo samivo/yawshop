@@ -279,7 +279,8 @@ public class CheckoutService : ICheckoutService
             {
                 if (callbackResult.PaymentStatus == PaymentStatus.Fail)
                 {
-                    _logger.LogCritical("Payment failed. Checkout reference: {checkoutReference}. Transaction id: {transactionId}", callbackResult.CheckoutReference, callbackResult.TransactionId);
+                    //Commented out, payment fail comes if customer just cancels payment process
+                    //_logger.LogCritical("Payment failed. Checkout reference: {checkoutReference}. Transaction id: {transactionId}", callbackResult.CheckoutReference, callbackResult.TransactionId);
                 }
                 else
                 {

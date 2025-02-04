@@ -94,8 +94,20 @@ public class DiscountController : ControllerBase
     {
         try
         {
+            //Get discounts
+            var discounts = await _discount.FindAsNoTrackingAsync(discount => discount.Code == body.DiscountCode);
 
-            var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == body.DiscountCode)).Single();
+            //Should only find one
+            if(discounts.Count > 1){
+                throw new InvalidOperationException("Multiple discounts found?");
+            }
+
+            if (discounts == null || discounts.Count == 0)
+            {
+                return StatusCode(400, "Invalid code.");
+            }
+
+            var discount = discounts.First();
 
             if (!string.Equals(discount.Code.ToUpper(), body.DiscountCode.ToUpper()))
             {
@@ -111,7 +123,7 @@ public class DiscountController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError("Failed validate discount code: {err}", ex.ToString());
+            _logger.LogError("Error with discount: {err}", ex.ToString());
             return StatusCode(400, "Invalid code.");
         }
     }
