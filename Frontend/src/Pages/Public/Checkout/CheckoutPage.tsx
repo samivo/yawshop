@@ -142,7 +142,7 @@ export const CheckoutPage: React.FC = () => {
                             ...item,
                             product: {
                                 ...item.product,
-                                priceInMinorUnitsIncludingVat: item.product.priceInMinorUnitsIncludingVat - discount.discountAmountInMinorUnits
+                                priceInMinorUnitsIncludingVat: ((item.product.priceInMinorUnitsIncludingVat - discount.discountAmountInMinorUnits) < 0 ? 0 : item.product.priceInMinorUnitsIncludingVat - discount.discountAmountInMinorUnits)
                             },
                             discount: discount,
                         };
