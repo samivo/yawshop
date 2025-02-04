@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using YawShop.Services.ProductService.Models;
 
@@ -24,14 +25,21 @@ public class ProductController : ControllerBase
     {
         try
         {
+            //Get all products
             var products = await _product.FindAsNoTrackingAsync(p => true);
+
+            if(products.Count == 0)
+            {
+                return NotFound("No products.");
+
+            }
 
             return Ok(products);
         }
         catch (Exception ex)
         {
             _logger.LogCritical("Failed to get products: {err}", ex.ToString());
-            return StatusCode(400, "No products.");
+            return StatusCode(500, "Failed to get products.");
         }
     }
 
@@ -41,24 +49,55 @@ public class ProductController : ControllerBase
     {
         try
         {
-            var products = await _product.FindAsNoTrackingAsync(product => product.IsActive);
+            //Get all products that are active and visible to public
+            var products = await _product.FindAsNoTrackingAsync(product => product.IsActive && product.IsVisibleToPublic);
 
-            var respondObject = new List<object>();
+            var publicProducts = new List<ProductModelPublic>();
 
+            //Add only public product properties to the respond object
             foreach (var product in products)
             {
-                if (product.IsVisibleToPublic)
-                {
-                    respondObject.Add(product.Public());
-                }
+                publicProducts.Add(_product.GetPublicProduct(product));
             }
 
-            return Ok(respondObject);
+            return Ok(publicProducts);
         }
         catch (Exception ex)
         {
             _logger.LogError("Failed to get public products: {err}", ex.ToString());
-            return StatusCode(400, "No products found.");
+            return NotFound("No products.");
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpGet("public/{productCode}")]
+    public async Task<IActionResult> GetAllPublicByCode(string productCode)
+    {
+        try
+        {
+            //Get product by code that is active and visible to public
+            var product = await _product.FindAsNoTrackingAsync(product => product.Code == productCode && product.IsActive && product.IsVisibleToPublic);
+
+            //Check that there is only one product with the code
+            if (product.Count == 0)
+            {
+                return NotFound("Product not found.");
+            }
+
+            if(product.Count > 1)
+            {
+                _logger.LogCritical("Duplicate product code found: {productCode}", productCode);
+                return NotFound("Product not found.");
+            }
+
+            //Create respond object with only public properties
+
+            return Ok(_product.GetPublicProduct(product.First()));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get public product: {err}", ex.ToString());
+            return NotFound("Product not found.");
         }
     }
 
@@ -67,9 +106,9 @@ public class ProductController : ControllerBase
     {
         try
         {
-            await _product.CreateAsync(product);
+            var prod = await _product.CreateAsync(product);
 
-            return Ok();
+            return Ok(prod);
         }
         catch (Exception ex)
         {
@@ -78,13 +117,13 @@ public class ProductController : ControllerBase
         }
     }
 
-    [HttpPut("{productCode}")]
-    public async Task<IActionResult> Update(string productCode, [FromBody] ProductModel product)
+    [HttpPut("")]
+    public async Task<IActionResult> Update([FromBody] ProductModel product)
     {
         try
         {
-            await _product.UpdateAsync(productCode, product);
-            return Ok();
+           var prod = await _product.UpdateAsync(product);
+            return Ok(prod);
         }
         catch (Exception ex)
         {
@@ -98,8 +137,8 @@ public class ProductController : ControllerBase
     {
         try
         {
-            await _product.RemoveAsync(productCode);
-            return Ok();
+            var prod = await _product.RemoveAsync(productCode);
+            return Ok(prod);
         }
         catch (Exception ex)
         {

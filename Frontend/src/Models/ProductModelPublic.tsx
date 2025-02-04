@@ -1,4 +1,4 @@
-import { ProductType, ProductSpesificClientFields } from "./ProductModel";
+import { ProductType, ProductSpecificClientFields } from "./ProductModel";
 
 export interface ProductModelPublic {
     code: string;
@@ -10,7 +10,7 @@ export interface ProductModelPublic {
     shortDescription: string;
     descriptionOrInnerHtml: string;
     avatarImage?: string;
-    customerFields?: ProductSpesificClientFields[];
+    customerFields?: ProductSpecificClientFields[];
     productGroupId?: number;
     giftcardTargetProductCode: string;
     giftcardPeriodInDays: number;

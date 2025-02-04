@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import ProductModel, { CustomerFieldType, ProductSpesificClientFields, ProductType } from "../../../Utilities/ProductModel";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { TextField, Modal, Box, Grid2, InputAdornment, IconButton, FormGroup, FormControlLabel, Switch, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Avatar } from "@mui/material";
 import { Editor } from '@tinymce/tinymce-react';
 import { ApiEndpoint, ApiV1, Method } from "../../../Utilities/ApiFetch";
+import { CustomerFieldType, ProductModel, ProductSpecificClientFields, ProductType } from "../../../Models/ProductModel";
 
 
 declare global {
@@ -28,22 +28,23 @@ const initialFormData: ProductModel = {
     shortDescription: "",
     descriptionOrInnerHtml: "",
     internalComment: "",
-    availableFrom: undefined,
+    availableFrom: new Date(),
     availableTo: null,
     productType: 0,
     customerFields: [],
     productGroupId: null,
     giftcardTargetProductCode: "",
     giftcardPeriodInDays: 0,
-    createdAt: undefined,
-    modifiedAt: undefined,
+    createdAt: new Date(),
+    modifiedAt: new Date(),
     modifier: null,
+    avatarImage: "",
 };
 
 interface BasicModalProps {
     open: boolean;
     handleClose: () => void;
-    product: ProductModel | null | undefined;
+    product: ProductModel | null ;
     products: ProductModel[] | null;
 }
 
@@ -113,7 +114,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
         if (product) {
 
             try {
-                await ApiV1(ApiEndpoint.Product, Method.PUT, false, formData, `/${formData.code}`);
+                await ApiV1(ApiEndpoint.Product, Method.PUT, false, formData);
             } catch (error) {
                 console.log(error);
                 //show error to user?
@@ -148,13 +149,17 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
     const addDatafield = () => {
         
-        var newFields: ProductSpesificClientFields = {
-
-            fieldName : dataFieldValue,
-            fieldNamePublic : dataFieldValue,
-            fieldType : CustomerFieldType.Text,
-            isRequired: true,
-        };
+        if(product){
+            var newFields: ProductSpecificClientFields = {
+                id: 0,
+                productModelId: product.id,
+                fieldName : dataFieldValue,
+                fieldType : CustomerFieldType.Text,
+                isRequired: true,
+                href: "",
+            };
+        }
+        
 
         setFormData((data: ProductModel) => ({
             ...data,
@@ -167,7 +172,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
         setFormData((prevData) => ({
             ...prevData,
-            customerFields: prevData.customerFields?.filter(
+            customerFields: (prevData.customerFields || []).filter(
                 (field) => field.fieldName !== fieldName
             ),
         }));
@@ -425,7 +430,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
                         <Grid2 size={12}>
 
-                            <Avatar alt="productAvatar" sx={{ width: 200, height: 200, borderRadius: '50%' }} src={formData.avatarImage}/>
+                            <Avatar alt="productAvatar" sx={{ width: 200, height: 200, borderRadius: '50%' }} src={formData.avatarImage || ""} />
 
                         </Grid2>
                     </Grid2>
@@ -441,7 +446,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
                                     plugins: 'advlist autolink lists link image charmap ',
                                 }}
                                 apiKey="cbnlpc6pajf392214l0g75a6hl0wxj7tpc5eh6c12y7aabks"
-                                value={formData.descriptionOrInnerHtml}
+                                value={formData.descriptionOrInnerHtml ? formData.descriptionOrInnerHtml : ""}
                                 onEditorChange={(newContent) =>
                                     setFormData((prevData) => ({
                                         ...prevData,
@@ -483,7 +488,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
                     <Grid2 container size={12} spacing={2}>
 
-                        {formData.customerFields?.map((value: ProductSpesificClientFields) => (
+                        {formData.customerFields?.map((value: ProductSpecificClientFields) => (
                             <DatafieldComponent key={Math.random()} field={value.fieldName} />
                         ))}
 
@@ -518,7 +523,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
                                         <Select
                                             name="giftcardTargetProductCode"
                                             id="giftcardTargetProductCode"
-                                            value={formData.giftcardTargetProductCode}
+                                            value={formData.giftcardTargetProductCode || ""}
                                             size="small"
                                             label="Kohdetuote"
                                             onChange={handleSelect}

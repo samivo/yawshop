@@ -6,11 +6,11 @@ namespace YawShop.Services.ProductService;
 public interface IProductService
 {
 
-    public Task CreateAsync(ProductModel product);
+    public Task<ProductModel> CreateAsync(ProductModel product);
 
-    public Task RemoveAsync(string productCode);
+    public Task<ProductModel> RemoveAsync(string productCode);
 
-    public Task UpdateAsync(string productCode, ProductModel product);
+    public Task<ProductModel> UpdateAsync(ProductModel product);
 
     public Task<List<ProductModel>> FindAsNoTrackingAsync(Expression<Func<ProductModel, bool>> predicate);
 
@@ -25,4 +25,7 @@ public interface IProductService
     /// <param name="value"></param>
     /// <returns></returns>
     public Task AddQuantityUsed(string productCode, int value);
+
+    public ProductModelPublic GetPublicProduct(ProductModel product);
+
 }

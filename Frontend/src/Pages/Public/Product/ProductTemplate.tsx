@@ -6,8 +6,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { ProductModelPublic } from '../../../Utilities/ProductModelPublic';
-import { ProductType } from '../../../Utilities/ProductModel';
+import { ProductModelPublic } from '../../../Models/ProductModelPublic';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { DateCalendar, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -20,6 +19,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import { DateToString } from '../../../Utilities/DateToString';
 import { ShoppingCartItem } from '../../../Utilities/ShoppingCartItem';
 import { useNavigate } from 'react-router-dom';
+import { ProductType } from '../../../Models/ProductModel';
 
 const steps = [
     'Valitse tuote',

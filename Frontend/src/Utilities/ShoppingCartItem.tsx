@@ -1,7 +1,7 @@
 import { Discount } from "./DiscountModel";
 import { EventModelPublicModel } from "./EventModelPublicModel";
 import { Giftcard } from "./GiftcardModel";
-import { ProductModelPublic } from "./ProductModelPublic";
+import { ProductModelPublic } from "../Models/ProductModelPublic";
 
 export interface ShoppingCartItem {
 

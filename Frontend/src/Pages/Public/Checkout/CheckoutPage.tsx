@@ -5,12 +5,12 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { ShoppingCartItem } from "../../../Utilities/ShoppingCartItem";
 import React, { useEffect, useState } from "react";
 import { DateToString } from "../../../Utilities/DateToString";
-import { ProductSpesificClientFields, ProductType } from "../../../Utilities/ProductModel";
 import { ApiEndpoint, ApiV1, Method } from "../../../Utilities/ApiFetch";
 import { ClientModel, ShoppingCartModel } from "../../../Utilities/ShoppingCartModel";
 import { Discount } from "../../../Utilities/DiscountModel";
 import PaytrailImage from "../../../assets/2025-pankit-visa-mastercard-mobilepay.svg";
 import { CheckoutResponse } from "../../../Utilities/CheckoutResponse";
+import { ProductSpecificClientFields, ProductType } from "../../../Models/ProductModel";
 
 const steps = [
     'Valitse tuote',
@@ -192,9 +192,9 @@ const CheckoutSummary: React.FC<Props> = (props) => {
  * @param cartItems 
  * @returns Distinct list of client fields
  */
-const getRequiredInfoFields = (cartItems: ShoppingCartItem[]): ProductSpesificClientFields[] => {
+const getRequiredInfoFields = (cartItems: ShoppingCartItem[]): ProductSpecificClientFields[] => {
 
-    let productSpesificInfoList: ProductSpesificClientFields[] = [];
+    let productSpesificInfoList: ProductSpecificClientFields[] = [];
     let fieldNamesSet = new Set<string>();
 
     cartItems.forEach(cartItem => {

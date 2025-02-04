@@ -1,30 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Runtime.Serialization;
-using System.Text.Json.Serialization;
 using YawShop.Attributes;
-using YawShop.Interfaces;
 using YawShop.Services.ClientService.Models;
-using YawShop.Utilities;
 
 namespace YawShop.Services.ProductService.Models;
 
-public class ProductModel : IPublishable
+public class ProductModel
 {
     [NoApiUpdate]
     [NotPublic]
     public int Id { get; private set; } = 0;
 
     [NoApiUpdate]
-    public string Code { get; private set; } = Guid.NewGuid().ToString();
+    public required string Code { get;  set; } 
 
+    [Required]
     public required string Name { get; set; }
 
     [NotPublic]
-    public required bool IsActive { get; set; }
+    public bool IsActive { get; set; }
 
     [NotPublic]
-    public required bool IsVisibleToPublic { get; set; }
+    public bool IsVisibleToPublic { get; set; }
 
     public int? MaxQuantityPerPurchase { get; set; }
 
@@ -52,39 +49,38 @@ public class ProductModel : IPublishable
         }
     }
 
+    [Required]
+    [Range(0, double.MaxValue)]
     public required int PriceInMinorUnitsIncludingVat { get; set; }
 
+    [Required]
     [Range(0, 100.0)]
     public required decimal VatPercentage { get; set; }
 
-    public required string ShortDescription { get; set; }
+    public string? ShortDescription { get; set; }
 
-    public required string DescriptionOrInnerHtml { get; set; }
+    public string? DescriptionOrInnerHtml { get; set; }
 
     public string? AvatarImage { get; set; }
 
     [NotPublic]
     public string? InternalComment { get; set; }
 
+    [Required]
     [NotPublic]
-    public DateTime AvailableFrom { get; set; } = DateTime.Now;
+    public required DateTime AvailableFrom { get; set; }
 
     [NotPublic]
     public DateTime? AvailableTo { get; set; }
 
+    [Required]
     [NoApiUpdate]
-    public ProductType ProductType { get; set; }
+    public required ProductType ProductType { get; set; }
 
     public List<ProductSpesificClientFields>? CustomerFields { get; set; }
 
-    /// <summary>
-    /// Not implemented yet. Example if you have same type of product with different options(eg. different size t-shirts), use group id to group them up.
-    /// Gourp id then could be used in the product page to list same type of products in drop down menu.
-    /// Maybe better options but just reminder.
-    /// </summary>
     public int? ProductGroupId { get; set; }
 
-    [NoApiUpdate]
     public string GiftcardTargetProductCode { get; set; } = "";
 
     public int GiftcardPeriodInDays { get; set; }
@@ -106,16 +102,6 @@ public class ProductModel : IPublishable
         Modifier = modifier;
         ModifiedAt = DateTime.Now;
     }
-
-    /// <summary>
-    /// Returns object that excludes all properties with attribute tag "notPublic".
-    /// </summary>
-    /// <returns>object</returns>
-    public object Public()
-    {
-        return AttributeParser.FilterPropertiesByAttribute(typeof(NotPublicAttribute), this);
-    }
-
 }
 
 public class ProductSpesificClientFields
@@ -126,11 +112,16 @@ public class ProductSpesificClientFields
 
     [NoApiUpdate]
     [NotPublic]
-    public int ProductModelId { get; set; }
+    public int ProductModelId { get; private set; }
+    
+    [Required]
     public required string FieldName { get; set; }
-    public required string FieldNamePublic { get; set; }
-    public bool IsRequired { get; set; }
+
+    public bool IsRequired { get; set; } = true;
+
     public string? Href { get; set; }
+
+    [Required]
     public required CustomerFieldType FieldType { get; set; }
 }
 

@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using YawShop.Attributes;
 using YawShop.Services.ProductService.Models;
 using YawShop.Utilities;
@@ -18,18 +20,21 @@ public class ProductService : IProductService
         _context = context;
     }
 
-    public async Task CreateAsync(ProductModel product)
+    public async Task<ProductModel> CreateAsync(ProductModel product)
     {
         try
         {
+            //Check there is no duplicates
             if (await _context.Products.AnyAsync(p => p.Code == product.Code))
             {
                 throw new InvalidOperationException("Duplicate product found. Cant create product.");
             }
 
+            //Add product
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
-            return;
+
+            return product;
         }
         catch (Exception ex)
         {
@@ -47,7 +52,6 @@ public class ProductService : IProductService
             var product = await _context.Products.Include(p => p.CustomerFields).AsNoTracking().Where(predicate).ToListAsync();
 
             return product;
-
         }
         catch (Exception ex)
         {
@@ -63,7 +67,6 @@ public class ProductService : IProductService
             var product = await _context.Products.Include(p => p.CustomerFields).Where(predicate).ToListAsync();
 
             return product;
-
         }
         catch (Exception ex)
         {
@@ -72,18 +75,17 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task RemoveAsync(string productCode)
+    public async Task<ProductModel> RemoveAsync(string productCode)
     {
         try
         {
-            var product = await _context.Products.SingleAsync(p => p.Code == productCode);
+            //Get target product
+            var product =  (await FindAsync(p => p.Code == productCode)).Single();
 
-            //Check if product has transaction first
-            //TODO
             _context.Remove(product);
-
             await _context.SaveChangesAsync();
-            return;
+
+            return product;
         }
         catch (Exception ex)
         {
@@ -92,16 +94,18 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task UpdateAsync(string productCode, ProductModel updatedProduct)
+    public async Task<ProductModel> UpdateAsync(ProductModel updatedProduct)
     {
         try
         {
-            var oldProduct = await _context.Products.Include(product => product.CustomerFields).SingleAsync(p => p.Code == productCode);
+            //Get target product
+            var oldProduct = (await FindAsync(p => p.Code == updatedProduct.Code)).Single();
 
+            //Copy allowed properties
             PropertyCopy.CopyWithoutAttribute(updatedProduct, oldProduct, typeof(NoApiUpdateAttribute));
-
             await _context.SaveChangesAsync();
-            return;
+
+            return oldProduct;
         }
         catch (Exception ex)
         {
@@ -115,19 +119,16 @@ public class ProductService : IProductService
 
         if (!product.IsActive)
         {
-            _logger.LogInformation("Product is not available: product is inactive.");
             return false;
         }
 
         if (product.AvailableFrom > DateTime.Now)
         {
-            _logger.LogInformation("Product is not available: sales not yes started.");
             return false;
         }
 
         if (product.AvailableTo < DateTime.Now)
         {
-            _logger.LogInformation("Product is not available: sales ended");
             return false;
         }
 
@@ -138,10 +139,12 @@ public class ProductService : IProductService
     {
         try
         {
-            var product = await _context.Products.SingleAsync(p => p.Code == productCode);
-            product.QuantityUsed += value;
+            var product = (await FindAsync(p => p.Code == productCode)).Single();
 
+            product.QuantityUsed += value;
             await _context.SaveChangesAsync();
+
+            return;
         }
         catch (Exception ex)
         {
@@ -150,5 +153,33 @@ public class ProductService : IProductService
         }
     }
 
+    public ProductModelPublic GetPublicProduct(ProductModel product)
+    {
+        var publicProduct = new ProductModelPublic
+        {
+            Code = product.Code,
+            AvatarImage = product.AvatarImage,
+            CustomerFields = product.CustomerFields?.Select(field => new ProductSpesificClientFieldsPublic
+            {
+                FieldName = field.FieldName,
+                FieldType = field.FieldType,
+                Href = field.Href,
+                IsRequired = field.IsRequired,
+            }).ToList() ?? new List<ProductSpesificClientFieldsPublic>(),
+            DescriptionOrInnerHtml = product.DescriptionOrInnerHtml,
+            GiftcardPeriodInDays = product.GiftcardPeriodInDays,
+            GiftcardTargetProductCode = product.GiftcardTargetProductCode,
+            MaxQuantityPerPurchase = product.MaxQuantityPerPurchase,
+            Name = product.Name,
+            PriceInMinorUnitsIncludingVat = product.PriceInMinorUnitsIncludingVat,
+            ProductGroupId = product.ProductGroupId,
+            ProductType = product.ProductType,
+            QuantityLeft = product.QuantityLeft,
+            ShortDescription = product.ShortDescription,
+            VatPercentage = product.VatPercentage
 
+        };
+
+        return publicProduct;
+    }
 }

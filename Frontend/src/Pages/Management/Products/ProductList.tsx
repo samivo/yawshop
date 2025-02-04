@@ -1,6 +1,5 @@
 import Box from '@mui/material/Box';
 import { DataGrid, getGridDateOperators, GRID_DATE_COL_DEF,  gridClasses, GridColDef, GridColTypeDef, GridEditDateCell, GridFilterInputValueProps, GridRenderCellParams,  GridToolbar } from '@mui/x-data-grid';
-import ProductModel, { ProductType } from '../../../Utilities/ProductModel';
 import { useEffect, useState } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
@@ -10,6 +9,7 @@ import { Button, Grid2, IconButton } from '@mui/material';
 import ProductFormModal from './ProductForm';
 import EditIcon from '@mui/icons-material/Edit';
 import { ApiEndpoint, ApiV1, Method } from '../../../Utilities/ApiFetch';
+import { ProductModel, ProductType } from '../../../Models/ProductModel';
 
 
 const dateAdapter = new AdapterDateFns({ locale });
@@ -72,7 +72,7 @@ const dateColumnType: GridColTypeDef<Date, string> = {
 export default function ProductList() {
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [product,SetProduct] = useState<ProductModel | null | undefined>(null);
+  const [product, SetProduct] = useState<ProductModel | null>(null);
 
   const handleOpen = (Product: ProductModel | null) => {
 
@@ -81,7 +81,9 @@ export default function ProductList() {
     setModalOpen(true)
   };
 
-  const handleClose = () => { 
+  const handleClose = () => {
+    //When closing form modal update products
+    fetch();
     setModalOpen(false); 
   }
 

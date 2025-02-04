@@ -88,8 +88,14 @@ namespace YawShop
                     options.Secret = EnvVariableReader.GetVariable("PAYTRAIL_SECRET");
                     options.RedirectSuccess = EnvVariableReader.GetVariable("PAYTRAIL_REDIRECT_SUCCESS");
                     options.RedirectCancel = EnvVariableReader.GetVariable("PAYTRAIL_REDIRECT_CANCEL");
-                    options.CallbackSuccess = EnvVariableReader.GetVariable("PAYTRAIL_CALLBACK_SUCCESS");
-                    options.CallbackCancel = EnvVariableReader.GetVariable("PAYTRAIL_CALLBACK_CANCEL");
+
+                    //Omit callbacks in dev
+                    if (!builder.Environment.IsDevelopment())
+                    {
+                        options.CallbackSuccess = EnvVariableReader.GetVariable("PAYTRAIL_CALLBACK_SUCCESS");
+                        options.CallbackCancel = EnvVariableReader.GetVariable("PAYTRAIL_CALLBACK_CANCEL");
+                    }
+
                 }
                 catch (Exception ex)
                 {

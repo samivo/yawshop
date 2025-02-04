@@ -5,7 +5,7 @@ namespace YawShop.Utilities;
 public class AttributeParser
 {
     /// <summary>
-    /// Copies properties to new object, excluding properties that are tagged with given attribute.
+    /// Copies properties to new object, excluding properties with given attribute
     /// </summary>
     /// <param name="type"></param>
     /// <param name="sourceObject"></param>
@@ -28,6 +28,7 @@ public class AttributeParser
         return dictionary;
     }
 
+    //Sets object properties to camelCase for json
     private static string SetCamelCase(string targetString)
     {
 
