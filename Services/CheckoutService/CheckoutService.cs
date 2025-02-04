@@ -327,7 +327,7 @@ public class CheckoutService : ICheckoutService
     }
 
     /// <summary>
-    /// Process successful payment. Update discount and giftcard quantities.
+    /// Process successful payment.
     /// Send invoice
     /// Create giftcards
     /// </summary>
@@ -340,7 +340,7 @@ public class CheckoutService : ICheckoutService
             var checkout = await _context.Checkouts.Include(checkout => checkout.Products).SingleAsync(checkout => checkout.Reference == checkoutReference);
             checkout.Client = (await _client.GetAsync(client => client.Id == checkout.ClientId)).SingleOrDefault() ?? throw new InvalidOperationException("Cant find checkout's user from database?");
 
-            //Send Receipt
+            //Email Receipt 
             try
             {
                 var receipt = new EmailMessage
@@ -361,12 +361,12 @@ public class CheckoutService : ICheckoutService
             {
                 var product = (await _product.FindAsNoTrackingAsync(p => p.Code == productInfo.ProductCode)).SingleOrDefault();
 
-                //Skip discounts and giftcards in checkout list
                 if (product == null)
                 {
                     continue;
                 }
 
+                //Sends giftcards
                 if (product.ProductType == ProductType.Giftcard)
                 {
                     for (int i = 0; i < productInfo.Units; i++)
@@ -395,6 +395,7 @@ public class CheckoutService : ICheckoutService
                     }
                 }
 
+                //Send event mail
                 if (product.ProductType == ProductType.Event)
                 {
                     var evnt = (await _event.FindAsNoTrackingAsync(e => e.Code == productInfo.EventCode)).SingleOrDefault() ?? throw new InvalidOperationException("Checkout contains event that not exists.");
@@ -407,7 +408,7 @@ public class CheckoutService : ICheckoutService
                         }
                     };
 
-                    //Make unified email sender that checks unsended emails some interval?
+                    //TODO: Make mailer backround service?
                     await _email.SendMailAsync(eventEmail);
                 }
 
@@ -417,7 +418,6 @@ public class CheckoutService : ICheckoutService
         }
         catch (Exception)
         {
-
             throw;
         }
     }
@@ -431,14 +431,15 @@ public class CheckoutService : ICheckoutService
     {
         try
         {
+            //Create empty checkout
             var checkOutObject = new CheckoutModel
             {
                 Client = cart.Client,
-                Products = new List<CheckoutItem>()
+                Products = new List<CheckoutItem>(),
+                TotalAmount = 0,
             };
 
-            int TotalAmount = 0;
-
+            //Loop trough shopping cart and generate checkout items
             foreach (var productInfo in cart.ProductDetails)
             {
                 var product = (await _product.FindAsNoTrackingAsync(p => p.Code == productInfo.ProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("Cant find product by code.");
@@ -452,6 +453,7 @@ public class CheckoutService : ICheckoutService
                         throw new InvalidOperationException("Shopping cart contains product that is event type, but event codes are missing?");
                     }
 
+                    //Single product may contain multiple events
                     foreach (var eventCode in productInfo.EventCodes)
                     {
                         var evnt = (await _event.FindAsNoTrackingAsync(evnt => evnt.Code == eventCode)).SingleOrDefault() ?? throw new InvalidOperationException("No event found with given code");
@@ -467,7 +469,6 @@ public class CheckoutService : ICheckoutService
                             EventCode = eventCode,
                         });
 
-                        TotalAmount += product.PriceInMinorUnitsIncludingVat;
                     }
                 }
                 else
@@ -481,7 +482,6 @@ public class CheckoutService : ICheckoutService
                         ProductName = product.Name
                     });
 
-                    TotalAmount += product.PriceInMinorUnitsIncludingVat * productInfo.Quantity;
                 }
             }
 
@@ -498,47 +498,46 @@ public class CheckoutService : ICheckoutService
                     giftcard.ValueLeftInMinorUnits = giftcardTargetProduct.PriceInMinorUnitsIncludingVat;
                 }
 
-                checkOutObject.Products.Add(new CheckoutItem
-                {
-                    ProductName = (await _product.FindAsNoTrackingAsync(product => product.GiftcardTargetProductCode == giftcard.TargetProductCode)).First().Name,
-                    ProductCode = giftcard.Code,
-                    UnitPrice = -giftcard.ValueLeftInMinorUnits,
-                    Units = 1,
-                    VatPercentage = giftcardTargetProduct.VatPercentage
-                });
-
-                TotalAmount -= giftcard.ValueLeftInMinorUnits;
+                //TODO: create same style as discounts
 
             }
 
-            //Apply discount
+            //Apply discount to every product that matches.
             if (!string.IsNullOrEmpty(cart.DiscountCode))
             {
 
+                //TODO: the discount is currently targeted only single product. Change this when discount model changes to support multi product discount.
                 var discount = (await _discount.FindAsNoTrackingAsync(discount => discount.Code == cart.DiscountCode)).SingleOrDefault() ?? throw new InvalidOperationException("No discount found with given code");
-                var discountProduct = (await _product.FindAsNoTrackingAsync(product => product.Code == discount.TargetProductCode)).SingleOrDefault() ?? throw new InvalidOperationException("No product found with given code.");
 
-                checkOutObject.Products.Add(new CheckoutItem
+                //Get all products that discount should be applied
+                var targetProducts = checkOutObject.Products.Where(product => product.ProductCode == discount.TargetProductCode);
+
+                //Change checkout item price
+                foreach (var targetProduct in targetProducts)
                 {
-                    ProductName = discountProduct.Name,
-                    ProductCode = discount.Code,
-                    UnitPrice = -discount.DiscountAmountInMinorUnits,
-                    Units = 1,
-                    VatPercentage = discountProduct.VatPercentage
-                });
+                    //Set codes to checkout item
 
-                TotalAmount -= discount.DiscountAmountInMinorUnits;
+                    targetProduct.DiscountCode = discount.Code;
+
+                    targetProduct.UnitPrice -= discount.DiscountAmountInMinorUnits;
+                    if (targetProduct.UnitPrice < 0)
+                    {
+                        targetProduct.UnitPrice = 0;
+                    }
+                }
+
             }
 
-            if (TotalAmount < 0)
+            //calculate final sum
+
+            foreach (var product in checkOutObject.Products)
             {
+                checkOutObject.TotalAmount += product.UnitPrice * product.Units;
+            }
+
+            if(checkOutObject.TotalAmount < 0){
                 checkOutObject.TotalAmount = 0;
             }
-            else
-            {
-                checkOutObject.TotalAmount = TotalAmount;
-            }
-
 
             return checkOutObject;
 

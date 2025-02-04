@@ -236,17 +236,13 @@ const ProductTemplate: React.FC = () => {
 
             localStorage.setItem("shop_cart", JSON.stringify(shoppingCart));
 
-
             navigate("/checkout");
-
 
         } catch (error) {
             throw error;
 
         }
-
     }
-
 
     return (
 

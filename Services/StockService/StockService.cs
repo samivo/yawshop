@@ -53,15 +53,19 @@ public class StockService : IStockService
             var itemCodes = checkoutModel.Products.Select(p => p.ProductCode).ToList();
             var eventCodes = checkoutModel.Products.Select(p => p.EventCode).ToList();
 
+            //Get giftcards and discountcodes from checkout
+            var giftcardCodes = checkoutModel.Products.Select(p => p.GiftcardCode).ToList();
+            var discountCodes = checkoutModel.Products.Select(p => p.DiscountCode).ToList();
+
             //Get real product and event models by codes
             var products = await _product.FindAsync(p => itemCodes.Contains(p.Code));
             var events = await _event.FindAsync(p => eventCodes.Contains(p.Code));
 
             //Get giftcards
-            var giftcards = await _giftcard.FindAsync(giftcard => itemCodes.Contains(giftcard.Code));
+            var giftcards = await _giftcard.FindAsync(giftcard => giftcardCodes.Contains(giftcard.Code));
 
             //Get discounts
-            var discounts = await _discount.FindAsync(discount => itemCodes.Contains(discount.Code));
+            var discounts = await _discount.FindAsync(discount => discountCodes.Contains(discount.Code));
 
             foreach (var product in products)
             {
