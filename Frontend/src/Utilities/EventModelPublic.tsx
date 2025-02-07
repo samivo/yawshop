@@ -1,5 +1,5 @@
 
-export interface EventModelPublicModel {
+export interface EventModelPublic {
     code: string,
     productCode: string,
     registrationsLeft: number | null,

@@ -12,7 +12,7 @@ import { DateCalendar, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { fi as locale } from 'date-fns/locale';
-import { EventModelPublicModel, EventStatus } from '../../../Utilities/EventModelPublicModel';
+import { EventModelPublic, EventStatus } from '../../../Utilities/EventModelPublic';
 import { ApiEndpoint, ApiV1, Method } from '../../../Utilities/ApiFetch';
 import { isNumber } from '@mui/x-data-grid/internals';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -36,15 +36,15 @@ const ProductTemplate: React.FC = () => {
 
     const [products, SetProducts] = useState<ProductModelPublic[]>();
     const [product, SetProduct] = useState<ProductModelPublic>();
-    const [events, SetEvents] = useState<EventModelPublicModel[]>();
+    const [events, SetEvents] = useState<EventModelPublic[]>();
     const [selectedDate, SetSelectedDate] = useState<Date>(new Date);
-    const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublicModel[] | undefined>();
-    const [selectedEvent, SetSelectedEvent] = useState<EventModelPublicModel | null>(null);
+    const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublic[] | undefined>();
+    const [selectedEvent, SetSelectedEvent] = useState<EventModelPublic | null>(null);
 
     const fetch = async () => {
 
         let prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
-        let events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
+        let events: EventModelPublic[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
 
         //Get upcoming events for this product
         events = events.filter(event => event.productCode == code && (new Date(event.eventStart)) > new Date());
@@ -148,7 +148,7 @@ const ProductTemplate: React.FC = () => {
             <List dense={true}
             >
 
-                {eventsInSelectedDate?.map((event: EventModelPublicModel, key: number) => {
+                {eventsInSelectedDate?.map((event: EventModelPublic, key: number) => {
 
                     return (
                         <ListItemButton

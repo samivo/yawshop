@@ -157,7 +157,6 @@ export default function ProductList() {
       width: 130,
       valueGetter: (value) => {
         return (new Date(value));
-
       }
     },
 

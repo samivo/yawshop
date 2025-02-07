@@ -43,22 +43,7 @@ public class CheckoutService : ICheckoutService
         _stock = stockService;
         _email = emailer;
     }
-
-
-
-    public async Task<CheckoutModel?> GetSingleAsync(Expression<Func<CheckoutModel, bool>> predicate)
-    {
-        try
-        {
-            var checkout = await _context.Checkouts.AsNoTracking().Include(c => c.Products).SingleOrDefaultAsync(predicate);
-            return checkout;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to get checkout: {err}", ex.ToString());
-            throw;
-        }
-    }
+    
 
     /// <summary>
     /// Processes the cart and init payment
@@ -263,7 +248,8 @@ public class CheckoutService : ICheckoutService
         await _context.Database.BeginTransactionAsync();
         try
         {
-            var checkout = await _context.Checkouts.SingleOrDefaultAsync(checkout => checkout.Reference == callbackResult.CheckoutReference);
+            var checkouts = await FindAsync(checkout => checkout.Reference == callbackResult.CheckoutReference);
+            var checkout = checkouts?.SingleOrDefault();
 
             if (checkout == null)
             {
@@ -286,7 +272,7 @@ public class CheckoutService : ICheckoutService
                 {
                     _logger.LogInformation("Payment cancelled. Checkout reference: {checkoutReference}", callbackResult.CheckoutReference);
                 }
-                await _stock.UpdateQuantitiesAsync(checkout.Reference, false);
+                await _stock.UpdateQuantitiesAsync(checkout, false);
             }
 
             else if (callbackResult.PaymentStatus == PaymentStatus.Pending || callbackResult.PaymentStatus == PaymentStatus.Delayed)
@@ -549,5 +535,23 @@ public class CheckoutService : ICheckoutService
         }
     }
 
+    public async Task<List<CheckoutModel>?> FindAsync(Expression<Func<CheckoutModel, bool>> predicate)
+    {
+        try
+        {
+            var checkouts = await _context.Checkouts.Include(c => c.Products).Where(predicate).ToListAsync();
 
+            foreach (var checkout in checkouts)
+            {
+                checkout.Client = (await _client.GetAsync(client => client.Id == checkout.ClientId)).Single();
+            }
+            
+            return checkouts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get checkouts: {err}", ex.ToString());
+            throw;
+        }
+    }
 }

@@ -14,6 +14,8 @@ import EventIcon from '@mui/icons-material/Event';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import DiscountIcon from '@mui/icons-material/Discount';
 import ProductList from './Products/ProductList';
+import { EventList } from './Events/EventList';
+import { RegistrationsList } from './Events/RegistrationList';
 
 const NAVIGATION: Navigation = [
   {
@@ -40,6 +42,16 @@ const NAVIGATION: Navigation = [
     segment: 'events',
     title: 'Tapahtumat',
     icon: <EventIcon />,
+    children: [
+      {
+        segment: 'eventsList',
+        title: 'Tapahtumat',
+      },
+      {
+        segment: 'registrationsList',
+        title: 'Ilmoittautuneet',
+      },
+    ]
   },
   {
     segment: 'giftcards',
@@ -101,10 +113,14 @@ const demoTheme = createTheme({
 
 function DashboardPage({ pathname }: { pathname: string }) {
 
-    switch (pathname) {
-        case "/products":
-            return (<ProductList />);
-    }
+  switch (pathname) {
+    case "/products":
+      return (<ProductList />);
+    case "/events/eventsList":
+      return (<EventList/>);
+    case "/events/registrationsList":
+      return (<RegistrationsList/>);
+  }
 
 }
 

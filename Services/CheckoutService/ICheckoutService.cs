@@ -14,12 +14,7 @@ public interface ICheckoutService
     /// <returns></returns>
     public Task HandlePaymentCallbackAsync(CallbackResult callbackResult);
 
-    /// <summary>
-    /// Finds single or default checkoutmodel
-    /// </summary>
-    /// <param name="predicate"></param>
-    /// <returns>Checkoutmodel</returns>
-    public Task<CheckoutModel?> GetSingleAsync(Expression<Func<CheckoutModel, bool>> predicate);
+    public Task<List<CheckoutModel>?> FindAsync(Expression<Func<CheckoutModel, bool>> predicate);
 
     /// <summary>
     /// Process shopping cart and return href to payment gateway

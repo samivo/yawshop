@@ -27,24 +27,6 @@ public class StockService : IStockService
         _event = eventService;
     }
 
-    public async Task UpdateQuantitiesAsync(string checkoutReference, bool AddQuantities)
-    {
-        try
-        {
-            //Get checkout object by code
-            var checkout = await _context.Checkouts.Include(c => c.Products).SingleAsync(c => c.Reference == checkoutReference);
-
-            await UpdateQuantitiesAsync(checkout, AddQuantities);
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to update product and event quantities: {err}", ex.ToString());
-            
-            throw;
-        }
-    }
-
     public async Task UpdateQuantitiesAsync(CheckoutModel checkoutModel, bool AddQuantities)
     {
         try
@@ -88,13 +70,23 @@ public class StockService : IStockService
             {
                 var quantity = checkoutModel.Products.Where(p => p.EventCode == singleEvent.Code).Select(p => p.Units).Single();
 
+                //Add client codes
+                if (singleEvent.ClientCodes == null || singleEvent.ClientCodes.Count <= 0)
+                {
+                    singleEvent.ClientCodes = new List<string>();
+                }
+                
                 if (AddQuantities)
                 {
+                    //Increase quantities. Client codes added later, so quantities are not necessary anymore?
                     singleEvent.RegistrationsQuantityUsed += quantity;
+                    singleEvent.ClientCodes.Add(checkoutModel.Client.Code);
                 }
                 else
                 {
+                    //Decrease quantities
                     singleEvent.RegistrationsQuantityUsed -= quantity;
+                    singleEvent.ClientCodes.Remove(checkoutModel.Client.Code);
                 }
             }
 

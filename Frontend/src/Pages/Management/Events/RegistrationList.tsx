@@ -65,7 +65,7 @@ function GridFilterDateInput(
     },
   };
 
-export const EventList: React.FC = () => {
+export const RegistrationsList: React.FC = () => {
 
     const [products, SetProducts] = useState<ProductModel[]>();
     const [events, SetEvents] = useState<EventModel[]>();

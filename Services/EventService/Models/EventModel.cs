@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using YawShop.Attributes;
 using YawShop.Interfaces;
+using YawShop.Services.ClientService.Models;
 using YawShop.Utilities;
 
 namespace YawShop.Services.EventService.Models;
@@ -77,7 +78,7 @@ public class EventModel : IPublishable
 
     [NotPublic]
     [NoApiUpdate]
-    public int? ClientId { get; set; }
+    public List<string>? ClientCodes { get; set; }
 
     /// <summary>
     /// Returns object from this object that excludes all properties with attribute tag "notPublic".
