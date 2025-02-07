@@ -67,6 +67,7 @@ function GridFilterDateInput(
 
 export const EventList: React.FC = () => {
 
+    const [updateData, SetUpdateData] = useState<number>(0);
     const [products, SetProducts] = useState<ProductModel[]>();
     const [events, SetEvents] = useState<EventModel[]>();
     const [filteredEvents,SetFilteredEvents] = useState<EventModel[]>();
@@ -90,7 +91,7 @@ export const EventList: React.FC = () => {
 
         fetchData();
 
-    }, []);
+    }, [updateData]);
 
     //Filter past events
     useEffect(()=>{
@@ -109,9 +110,12 @@ export const EventList: React.FC = () => {
     };
 
     const handleCloseDialog = async (selection: boolean) => {
+        
         setOpenDialog(false);
+
         if (selection === true) {
             await ApiV1(ApiEndpoint.Event, Method.DELETE, false, null, `/${deleteEventCode.current}`);
+            SetUpdateData((new Date()).getTime());
         }
 
     };

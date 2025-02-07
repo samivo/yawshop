@@ -71,35 +71,35 @@ const dateColumnType: GridColTypeDef<Date, string> = {
 
 export default function ProductList() {
 
+  const [updateData, SetUpdateData] = useState<number>();
   const [modalOpen, setModalOpen] = useState(false);
   const [product, SetProduct] = useState<ProductModel | null>(null);
-
-  const handleOpen = (Product: ProductModel | null) => {
-
-    SetProduct(Product);
-    
-    setModalOpen(true)
-  };
-
-  const handleClose = () => {
-    //When closing form modal update products
-    fetch();
-    setModalOpen(false); 
-  }
-
   const [rows, setRows] = useState<any>();
-
-  const fetch = async () => {
-
-    var prods: ProductModel[] = await ApiV1(ApiEndpoint.Product, Method.GET, false);
-
-    setRows(prods);
-  };
   
     // Use the useEffect hook to run the function when the component mounts
     useEffect(() => {
+
+      const fetch = async () => {
+
+        var prods: ProductModel[] = await ApiV1(ApiEndpoint.Product, Method.GET, false);
+    
+        setRows(prods);
+      };
+
       fetch();
-    }, []);
+
+    }, [updateData]);
+
+    const handleOpen = (Product: ProductModel | null) => {
+
+      SetProduct(Product);
+      
+      setModalOpen(true)
+    };
+  
+    const handleClose = () => {
+      setModalOpen(false); 
+    }
 
   const columns: GridColDef<(typeof rows)[number]> [] = [
     {
@@ -206,7 +206,7 @@ export default function ProductList() {
           </Button>
         </Grid2>
 
-        <ProductFormModal open={modalOpen} handleClose={handleClose} product={product} products={rows} />
+        <ProductFormModal open={modalOpen} updateProductList={SetUpdateData} handleClose={handleClose} product={product} products={rows} />
 
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={locale}>
           <DataGrid
