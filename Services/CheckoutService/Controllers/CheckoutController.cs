@@ -36,4 +36,19 @@ public class CheckoutController : ControllerBase
             return StatusCode(400);
         }
     }
+
+    [HttpGet("")]
+    public async Task<IActionResult> GetAsync()
+    {
+        try
+        {   //Get all checkouts
+            var checkouts = await _checkout.FindAsNoTrackingAsync(checkout => true);
+            return Ok(checkouts);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error while getting checkouts: {err}", ex.ToString());
+            return StatusCode(400);
+        }
+    }
 }

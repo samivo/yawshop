@@ -22,7 +22,6 @@ export class DateToString {
             return "";
         }
 
-
         try {
 
             if (typeof inputDate === "string") {

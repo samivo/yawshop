@@ -12,9 +12,8 @@ import { DateCalendar, PickersDay, PickersDayProps } from '@mui/x-date-pickers';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { fi as locale } from 'date-fns/locale';
-import { EventModelPublicModel, EventStatus } from '../../../Utilities/EventModelPublicModel';
+import { EventModelPublic } from '../../../Utilities/EventModelPublic';
 import { ApiEndpoint, ApiV1, Method } from '../../../Utilities/ApiFetch';
-import { isNumber } from '@mui/x-data-grid/internals';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import { DateToString } from '../../../Utilities/DateToString';
 import { ShoppingCartItem } from '../../../Utilities/ShoppingCartItem';
@@ -36,15 +35,15 @@ const ProductTemplate: React.FC = () => {
 
     const [products, SetProducts] = useState<ProductModelPublic[]>();
     const [product, SetProduct] = useState<ProductModelPublic>();
-    const [events, SetEvents] = useState<EventModelPublicModel[]>();
+    const [events, SetEvents] = useState<EventModelPublic[]>();
     const [selectedDate, SetSelectedDate] = useState<Date>(new Date);
-    const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublicModel[] | undefined>();
-    const [selectedEvent, SetSelectedEvent] = useState<EventModelPublicModel | null>(null);
+    const [eventsInSelectedDate, SetEventsInSelectedDate] = useState<EventModelPublic[] | undefined>();
+    const [selectedEvent, SetSelectedEvent] = useState<EventModelPublic | null>(null);
 
     const fetch = async () => {
 
         let prods: ProductModelPublic[] = await ApiV1(ApiEndpoint.Product, Method.GET, true);
-        let events: EventModelPublicModel[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
+        let events: EventModelPublic[] = await ApiV1(ApiEndpoint.Event, Method.GET, true);
 
         //Get upcoming events for this product
         events = events.filter(event => event.productCode == code && (new Date(event.eventStart)) > new Date());
@@ -58,7 +57,7 @@ const ProductTemplate: React.FC = () => {
             //Sort events by start date
             events = events.sort((a, b) => (new Date(a.eventStart)).getTime() - (new Date(b.eventStart)).getTime());
 
-            let event = events.find(event => event.status === EventStatus.Available);
+            let event = events.find(event => event.isAvailable === true);
 
             if (event) {
                 SetSelectedDate(new Date(event.eventStart));
@@ -104,7 +103,7 @@ const ProductTemplate: React.FC = () => {
 
     const CustomDateSlot = (props: PickersDayProps<Date>) => {
 
-        let eventsLeftCount: number | string = 0;
+        let eventsLeftCount: number = 0;
         let totalEventsCount: number = 0;
 
         events?.forEach(event => {
@@ -113,28 +112,20 @@ const ProductTemplate: React.FC = () => {
 
                 totalEventsCount++;
 
-                if (event.registrationsLeft != null && event.registrationsLeft != undefined && isNumber(eventsLeftCount)) {
-
-                    if (event.status === EventStatus.Available) {
-                        eventsLeftCount += event.registrationsLeft;
-                    }
-
+                if (event.isAvailable) {
+                    eventsLeftCount++;
                 }
-                else {
-                    eventsLeftCount = 11;
-                }
-
             }
 
         });
 
         if (totalEventsCount > 0 && eventsLeftCount == 0 && showFullEvents) {
-            eventsLeftCount = "0";
+            eventsLeftCount = 0;
         }
 
         return (
             <>
-                <Badge overlap='circular' max={10} badgeContent={props.outsideCurrentMonth ? null : eventsLeftCount} color={eventsLeftCount === "0" ? "error" : "success"}>
+                <Badge overlap='circular' max={10} badgeContent={props.outsideCurrentMonth ? null : eventsLeftCount} color={eventsLeftCount === 0 ? "error" : "success"}>
                     <PickersDay sx={{ zIndex: '2' }} {...props} showDaysOutsideCurrentMonth={false} />
                 </Badge>
 
@@ -148,7 +139,7 @@ const ProductTemplate: React.FC = () => {
             <List dense={true}
             >
 
-                {eventsInSelectedDate?.map((event: EventModelPublicModel, key: number) => {
+                {eventsInSelectedDate?.map((event: EventModelPublic, key: number) => {
 
                     return (
                         <ListItemButton
@@ -156,12 +147,12 @@ const ProductTemplate: React.FC = () => {
                                 border: 'solid 1px',
                                 maxWidth: '100%',
                                 borderRadius: '10px',
-                                borderColor: event.status === EventStatus.Available ? "green" : "red",
+                                borderColor: event.isAvailable ? "green" : "red",
                                 marginBottom: '5px',
                                 //backgroundColor: event.code === selectedEvent?.code ? "" : "",
                                 borderWidth: event.code === selectedEvent?.code ? "2px" : "1px",
                             }}
-                            disabled={event.status === EventStatus.Available ? false : true}
+                            disabled={event.isAvailable ? false : true}
                             onClick={() => { SetSelectedEvent(event) }}
                             key={key}
                         >
@@ -188,7 +179,7 @@ const ProductTemplate: React.FC = () => {
 
                             </ListItemText>
 
-                            <ListItemText sx={{ textAlign: 'center', marginLeft: '10px' }} primary="Tilaa" secondary={event.registrationsLeft != null ? event.registrationsLeft : "On"}></ListItemText>
+                            {/* <ListItemText sx={{ textAlign: 'center', marginLeft: '10px' }} primary="Tilaa" secondary={event.registrationsLeft != null ? event.registrationsLeft : "On"}></ListItemText> */}
 
                         </ListItemButton>
                     );
@@ -212,11 +203,8 @@ const ProductTemplate: React.FC = () => {
                 throw "Checkout button clicked without product or event selected?";
             }
 
-            if (selectedEvent.status !== EventStatus.Available) {
+            if (!selectedEvent.isAvailable) {
                 throw "Checkout button clicked with event that is not available";
-            }
-            if (selectedEvent.registrationsLeft && selectedEvent.registrationsLeft <= 0) {
-                throw "Checkout button clicked but event has no registrations left";
             }
         }
         else {

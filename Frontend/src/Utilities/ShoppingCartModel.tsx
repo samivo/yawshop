@@ -18,6 +18,7 @@ export interface ProductInCart{
 }
 
 export interface ClientModel{
+    code: string | null,
     firstName: string,
     lastName: string,
     email: string,

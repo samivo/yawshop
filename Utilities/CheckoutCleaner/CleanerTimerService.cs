@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using YawShop.Services.CheckoutService;
 using YawShop.Services.StockService;
 
 namespace YawShop.Utilities.CheckoutCleaner;
@@ -11,11 +13,14 @@ public class CleanerTimerService : ICleanerTimerService
 
     private readonly IStockService _stock;
 
-    public CleanerTimerService(ILogger<CleanerTimerService> logger, ApplicationDbContext applicationDbContext, IStockService stockService)
+    private readonly ICheckoutService _checkout;
+
+    public CleanerTimerService(ILogger<CleanerTimerService> logger, ApplicationDbContext applicationDbContext, IStockService stockService, ICheckoutService checkoutService)
     {
         _logger = logger;
         _context = applicationDbContext;
         _stock = stockService;
+        _checkout = checkoutService;
 
     }
 
@@ -27,10 +32,10 @@ public class CleanerTimerService : ICleanerTimerService
 
             try
             {
-                //Get the checkouts with payments status "initialized" (0) 
-                var checkouts = await _context.Checkouts.Include(checkout => checkout.Products).Where(checkout => checkout.PaymentStatus == Services.CheckoutService.Models.PaymentStatus.Initialized).ToListAsync();
+                //Get the checkouts where payments status "initialized" (0) 
+                var checkouts = await _checkout.FindAsync(checkout => checkout.PaymentStatus == Services.CheckoutService.Models.PaymentStatus.Initialized);
 
-                if (checkouts.Count > 0)
+                if (checkouts?.Count > 0)
                 {
                     _logger.LogInformation("{count} floating checkout's detected.", checkouts.Count);
                     foreach (var checkout in checkouts)
@@ -38,7 +43,7 @@ public class CleanerTimerService : ICleanerTimerService
                         //If checkout is more than 10 minutes old
                         if (checkout.CreatedAt < DateTime.Now.AddMinutes(-10))
                         {
-                            await _stock.UpdateQuantitiesAsync(checkout.Reference, false);
+                            await _stock.UpdateQuantitiesAsync(checkout, false);
                             checkout.PaymentStatus = Services.CheckoutService.Models.PaymentStatus.Cancelled;
                             checkout.InternalComment = "Payment has floated more than 10 minutes. Cleaned by bot.";
                             _logger.LogInformation("Cleaned floating checkout. Reference: {ref}.", checkout.Reference);
@@ -58,6 +63,10 @@ public class CleanerTimerService : ICleanerTimerService
                 await _context.Database.RollbackTransactionAsync();
                 _logger.LogCritical("Automatic checkout cleaner error: {err}", ex);
                 throw;
+            }
+            finally{
+                //Because we are using same context for long period, tracking must be cleared in order to successfully read and update data
+                _context.ChangeTracker.Clear();
             }
 
             

@@ -46,9 +46,10 @@ interface BasicModalProps {
     handleClose: () => void;
     product: ProductModel | null ;
     products: ProductModel[] | null;
+    updateProductList: React.Dispatch<number>;
 }
 
-const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, product, products }) => {
+const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, product, products, updateProductList }) => {
 
 
     const [dataFieldValue, SetDataFieldValue] = useState<string>("");
@@ -115,6 +116,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
             try {
                 await ApiV1(ApiEndpoint.Product, Method.PUT, false, formData);
+                updateProductList((new Date()).getTime());
             } catch (error) {
                 console.log(error);
                 //show error to user?
@@ -125,6 +127,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
         else {
             try {
                 await ApiV1(ApiEndpoint.Product, Method.POST, false, formData);
+                updateProductList((new Date()).getTime());
             } catch (error) {
                 console.log(error);
                 //show error to user?
@@ -139,6 +142,7 @@ const ProductFormModal: React.FC<BasicModalProps> = ({ open, handleClose, produc
 
         try {
             await ApiV1(ApiEndpoint.Product, Method.DELETE, false, null, `/${formData.code}`);
+            updateProductList((new Date()).getTime());
         } catch (error) {
             return;
         }

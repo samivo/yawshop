@@ -18,6 +18,7 @@ const steps = [
 ];
 
 const initialCustomerForm: ClientModel = {
+    code: null,
     firstName: "",
     lastName: "",
     email: "",
