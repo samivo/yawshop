@@ -1,14 +1,13 @@
-import { EventStatus } from "../Utilities/EventModelPublic";
+import { ClientModel } from "../Utilities/ShoppingCartModel";
 
 export interface EventModel {
   code: string;
   productCode: string;
-  registrationsQuantityTotal: number | null;
-  registrationsQuantityUsed: number;
-  registrationsLeft: number | null;
   eventStart: Date;
   eventEnd: Date;
   hoursBeforeEventUnavailable: number;
-  status: EventStatus;
-  clientCodes: string[] | null;
+  isVisible: boolean;
+  isAvailable: boolean;
+  clientCode: string | null;
+  client: ClientModel | null;
 }

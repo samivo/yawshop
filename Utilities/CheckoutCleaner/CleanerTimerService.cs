@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using YawShop.Services.CheckoutService;
 using YawShop.Services.StockService;
@@ -31,7 +32,7 @@ public class CleanerTimerService : ICleanerTimerService
 
             try
             {
-                //Get the checkouts with payments status "initialized" (0) 
+                //Get the checkouts where payments status "initialized" (0) 
                 var checkouts = await _checkout.FindAsync(checkout => checkout.PaymentStatus == Services.CheckoutService.Models.PaymentStatus.Initialized);
 
                 if (checkouts?.Count > 0)
@@ -62,6 +63,10 @@ public class CleanerTimerService : ICleanerTimerService
                 await _context.Database.RollbackTransactionAsync();
                 _logger.LogCritical("Automatic checkout cleaner error: {err}", ex);
                 throw;
+            }
+            finally{
+                //Because we are using same context for long period, tracking must be cleared in order to successfully read and update data
+                _context.ChangeTracker.Clear();
             }
 
             

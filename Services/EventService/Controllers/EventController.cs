@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using YawShop.Services.CheckoutService;
 using YawShop.Services.EventService;
 using YawShop.Services.EventService.Models;
+using YawShop.Services.StockService;
 
 namespace YawShop.Services.EventService.Controllers;
 
@@ -12,12 +14,15 @@ public class EventController : ControllerBase
 {
     private readonly ILogger<EventController> _logger;
     private readonly IEventService _event;
+    private readonly IStockService _stock;
+    private readonly ICheckoutService _checkout;
 
-
-    public EventController(ILogger<EventController> logger, IEventService eventService)
+    public EventController(ILogger<EventController> logger, IEventService eventService, IStockService stockService, ICheckoutService checkoutService)
     {
         _logger = logger;
         _event = eventService;
+        _stock = stockService;
+        _checkout = checkoutService;
     }
 
 
@@ -41,8 +46,9 @@ public class EventController : ControllerBase
     public async Task<IActionResult> PublicGetAll()
     {
         try
-        {
-            var events = await _event.FindAsNoTrackingAsync(e => true);
+        {   
+            //Find all visible events
+            var events = await _event.FindAsNoTrackingAsync(e => e.IsVisible);
 
             var responseObject = new List<object>();
 
@@ -65,8 +71,8 @@ public class EventController : ControllerBase
     {
         try
         {
-            await _event.CreateAsync(newEvent);
-            return Ok();
+           var createdEvent = await _event.CreateAsync(newEvent);
+            return StatusCode(201,createdEvent );
         }
         catch (Exception ex)
         {
@@ -75,13 +81,51 @@ public class EventController : ControllerBase
         }
     }
 
-    [HttpPut("{eventCode}")]
-    public async Task<IActionResult> Update(string eventCode, [FromBody] EventModel newEvent)
+    [HttpPut("")]
+    public async Task<IActionResult> Update([FromBody] EventModel newEvent)
     {
         try
         {
-            await _event.UpdateAsync(eventCode, newEvent);
-            return Ok();
+            //Check is event unregistration needed?
+            var oldEvent = (await _event.FindAsNoTrackingAsync(e => e.Code == newEvent.Code)).Single();
+
+            //If client code is nulled then unregister
+            if (oldEvent.ClientCode != null && newEvent.ClientCode == null)
+            {
+                //Client should be unregistered
+                if (oldEvent.Client != null)
+                {
+                    //Get correct checkout and pass it to stock service
+                    var checkout = (await _checkout.FindAsync(c => c.ClientId == oldEvent.Client.Id))?.Single();
+
+                    if (checkout != null)
+                    {   
+                        //Do not cancel event, if there is ongoing payment process.
+                        if(checkout.PaymentStatus != CheckoutService.Models.PaymentStatus.Initialized)
+                        {
+                            await _stock.UpdateQuantitiesAsync(checkout, false, oldEvent.Code);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException("Cannot unregister event because there is ongoing payment process.");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("No checkout found for event?");
+                    }
+
+                }
+                else
+                {
+                    throw new InvalidOperationException("Client should be unregistered, but event does not contain client?");
+                }
+
+            }
+
+            var evnt = await _event.UpdateAsync(newEvent);
+
+            return Ok(evnt);
         }
         catch (Exception ex)
         {
@@ -89,6 +133,7 @@ public class EventController : ControllerBase
             return StatusCode(400, $"Unable to update event.");
         }
     }
+
 
     [HttpDelete("{eventCode}")]
     public async Task<IActionResult> Delete(string eventCode)
@@ -104,4 +149,5 @@ public class EventController : ControllerBase
             return StatusCode(500, $"Unable to remove event: {ex.Message}");
         }
     }
+
 }

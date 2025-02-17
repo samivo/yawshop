@@ -12,6 +12,6 @@ public interface IStockService
     /// <param name="checkoutModel"></param>
     /// <param name="AddQuantities"></param>
     /// <returns></returns>
-    public Task UpdateQuantitiesAsync(CheckoutModel checkoutModel, bool AddQuantities);
+    public Task UpdateQuantitiesAsync(CheckoutModel checkoutModel, bool AddQuantities, string? eventToUnregister = null);
 
 }

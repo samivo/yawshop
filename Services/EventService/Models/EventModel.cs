@@ -13,72 +13,48 @@ public class EventModel : IPublishable
     public int Id { get; private set; } = 0;
 
     [NoApiUpdate]
-    public string Code { get; private set; } = Guid.NewGuid().ToString();
+    public required string Code { get; set; }
 
     [NoApiUpdate]
     public required string ProductCode { get; set; }
 
-    [NotPublic]
-    public required int? RegistrationsQuantityTotal { get; set; }
-
-    [NotPublic]
-    [NoApiUpdate]
-    public int RegistrationsQuantityUsed { get; set; }
-
-    [NotMapped]
-    [NoApiUpdate]
-    public int? RegistrationsLeft
-    {
-        get
-        {
-            if (RegistrationsQuantityTotal != null)
-            {
-                return RegistrationsQuantityTotal - RegistrationsQuantityUsed;
-            }
-            else
-            {
-                return null;
-            }
-        }
-    }
-
-    [NoApiUpdate]
+    
     public required DateTime EventStart { get; set; }
 
-    [NoApiUpdate]
+    
     public required DateTime EventEnd { get; set; }
 
     public int HoursBeforeEventUnavailable { get; set; }
 
-    private EventStatus _status = EventStatus.Available;
+    [NotPublic]
+    public bool IsVisible { get; set; } = false;
 
-    public EventStatus Status
-    {
+    [NoApiUpdate]
+    [NotMapped]
+    public bool IsAvailable { 
         get
         {
-            if (EventStart.AddHours(-HoursBeforeEventUnavailable) < DateTime.Now && _status == EventStatus.Available)
+            //Check that events start is still in future
+            if (EventStart.CompareTo(DateTime.UtcNow.AddHours(HoursBeforeEventUnavailable)) > 0)
             {
-                _status = EventStatus.Expired;
-                return _status;
+                //Check that there is no client registered
+                if (ClientCode == null)
+                {
+                    return true;
+                }
+                
             }
 
-            if (RegistrationsLeft != null && RegistrationsLeft <= 0)
-            {
-                _status = EventStatus.Full;
-                return _status;
-            }
-
-            return _status;
+            return false;
         }
-        set
-        {
-            _status = value;
-        }
-    }
+     }
 
     [NotPublic]
-    [NoApiUpdate]
-    public List<string>? ClientCodes { get; set; }
+    public string? ClientCode { get; set; }
+
+    [NotMapped]
+    [NotPublic]
+    public ClientModel? Client { get; set; }
 
     /// <summary>
     /// Returns object from this object that excludes all properties with attribute tag "notPublic".
@@ -89,15 +65,5 @@ public class EventModel : IPublishable
         return AttributeParser.FilterPropertiesByAttribute(typeof(NotPublicAttribute), this);
     }
 
-}
-
-
-public enum EventStatus
-{
-    Available,
-    Full,
-    Cancelled,
-    Finished,
-    Expired,
 }
 

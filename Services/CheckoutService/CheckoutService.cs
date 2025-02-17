@@ -197,7 +197,7 @@ public class CheckoutService : ICheckoutService
                     {
                         var evnt = (await _event.FindAsNoTrackingAsync(evnt => evnt.Code == eventCode)).SingleOrDefault() ?? throw new InvalidOperationException("No event found with given code.");
 
-                        if (evnt.Status != EventStatus.Available)
+                        if (!evnt.IsVisible || !evnt.IsAvailable)
                         {
                             throw new InvalidOperationException("Event in shopping cart is not available.");
                         }
@@ -540,6 +540,26 @@ public class CheckoutService : ICheckoutService
         try
         {
             var checkouts = await _context.Checkouts.Include(c => c.Products).Where(predicate).ToListAsync();
+
+            foreach (var checkout in checkouts)
+            {
+                checkout.Client = (await _client.GetAsync(client => client.Id == checkout.ClientId)).Single();
+            }
+            
+            return checkouts;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Failed to get checkouts: {err}", ex.ToString());
+            throw;
+        }
+    }
+
+    public async Task<List<CheckoutModel>?> FindAsNoTrackingAsync(Expression<Func<CheckoutModel, bool>> predicate)
+    {
+        try
+        {
+            var checkouts = await _context.Checkouts.AsNoTracking().Include(c => c.Products).Where(predicate).ToListAsync();
 
             foreach (var checkout in checkouts)
             {

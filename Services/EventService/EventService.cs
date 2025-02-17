@@ -1,8 +1,11 @@
 using System.Linq.Expressions;
+using AngleSharp.Dom.Events;
 using Microsoft.EntityFrameworkCore;
 using YawShop.Attributes;
+using YawShop.Services.ClientService;
 using YawShop.Services.EventService.Models;
 using YawShop.Services.ProductService;
+using YawShop.Services.StockService;
 using YawShop.Utilities;
 
 namespace YawShop.Services.EventService;
@@ -12,32 +15,16 @@ public class EventService : IEventService
 
     private readonly ILogger<EventService> _logger;
     private readonly ApplicationDbContext _context;
-    private readonly IProductService _product;
+    private readonly IClientService _client;
 
-    public EventService(ILogger<EventService> logger, ApplicationDbContext context, IProductService productService)
+    public EventService(ILogger<EventService> logger, ApplicationDbContext context, IClientService clientService )
     {
         _logger = logger;
         _context = context;
-        _product = productService;
+        _client = clientService;
     }
 
-    public async Task AddRegistration(string eventCode, int value)
-    {
-        try
-        {
-            var evnt = await _context.Events.SingleAsync(e => e.Code == eventCode);
-            evnt.RegistrationsQuantityUsed += value;
-
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("Failed to add registration to event: {err}", ex.ToString());
-            throw;
-        }
-    }
-
-    public async Task CreateAsync(EventModel newEvent)
+    public async Task<EventModel> CreateAsync(EventModel newEvent)
     {
         try
         {
@@ -52,10 +39,13 @@ public class EventService : IEventService
                 throw new InvalidOperationException("Failed to create event. No product found with given product code.");
             }
 
+            //Ensure event code is assigned
+            newEvent.Code = Guid.NewGuid().ToString();
+
             await _context.Events.AddAsync(newEvent);
             await _context.SaveChangesAsync();
 
-            return;
+            return newEvent;
         }
         catch (Exception ex)
         {
@@ -69,6 +59,14 @@ public class EventService : IEventService
         try
         {
             var events = await _context.Events.Where(predicate).ToListAsync();
+
+            foreach (var singleEvent in events)
+            {
+                if (singleEvent.ClientCode != null)
+                {
+                    singleEvent.Client = (await _client.GetAsync(client => client.Code == singleEvent.ClientCode)).FirstOrDefault();
+                }
+            }
 
             return events;
         }
@@ -85,6 +83,15 @@ public class EventService : IEventService
         {
             var events = await _context.Events.AsNoTracking().Where(predicate).ToListAsync();
 
+            foreach (var singleEvent in events)
+            {
+                if (singleEvent.ClientCode != null)
+                {
+                    singleEvent.Client = (await _client.GetAsync(client => client.Code == singleEvent.ClientCode)).FirstOrDefault();
+                }
+            }
+
+
             return events;
         }
         catch (Exception ex)
@@ -94,14 +101,14 @@ public class EventService : IEventService
         }
     }
 
-    public async Task RemoveAsync(string eventCode)
+    public async Task<EventModel> RemoveAsync(string eventCode)
     {
         try
         {
             //Remove not allowed if event has registrations and is upcoming event
             var evnt = await _context.Events.SingleAsync(e => e.Code == eventCode);
 
-            if (evnt.RegistrationsQuantityUsed > 0)
+            if (evnt.ClientCode != null)
             {
                 throw new InvalidOperationException("Can not remove event that has registrations. Please cancel registrations first.");
             }
@@ -110,7 +117,7 @@ public class EventService : IEventService
 
             await _context.SaveChangesAsync();
 
-            return;
+            return evnt;
         }
         catch (Exception ex)
         {
@@ -119,15 +126,16 @@ public class EventService : IEventService
         }
     }
 
-    public async Task UpdateAsync(string eventCode, EventModel updatedEvent)
+    public async Task<EventModel> UpdateAsync(EventModel updatedEvent)
     {
         try
         {
-            var oldEvent = await _context.Events.SingleAsync(e => e.Code == eventCode);
+            var oldEvent = await _context.Events.SingleAsync(e => e.Code == updatedEvent.Code);
 
             PropertyCopy.CopyWithoutAttribute(updatedEvent, oldEvent, typeof(NoApiUpdateAttribute));
 
             await _context.SaveChangesAsync();
+            return oldEvent;
         }
         catch (Exception ex)
         {
@@ -135,5 +143,6 @@ public class EventService : IEventService
             throw;
         }
     }
+
 
 }

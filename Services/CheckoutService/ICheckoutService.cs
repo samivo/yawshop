@@ -15,6 +15,8 @@ public interface ICheckoutService
     public Task HandlePaymentCallbackAsync(CallbackResult callbackResult);
 
     public Task<List<CheckoutModel>?> FindAsync(Expression<Func<CheckoutModel, bool>> predicate);
+    
+    public Task<List<CheckoutModel>?> FindAsNoTrackingAsync(Expression<Func<CheckoutModel, bool>> predicate);
 
     /// <summary>
     /// Process shopping cart and return href to payment gateway
