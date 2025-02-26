@@ -73,7 +73,7 @@ namespace YawShop.Utilities
         <h3>Varausvahvistus</h3>
         <br>
         <p>Hei! Olet varannut ajan tapahtumaan {productName}.</p>
-        <p>Saavuthan paikalle viimeistään {eventStart:dd-MM-yyyy} klo {eventStart:HH:mm}.</p>
+        <p>Saavuthan paikalle viimeistään {DateTimeString.GetHumanReadableDateTimeString(eventStart)}.</p>
         <p>Tapahtumapaikan ja lisätiedot löydät tuotesivulta alla olevasta linkistä.</p>
         <a href='https://shop.klu.fi/product/{productCode}' > https://shop.klu.fi/product/{productCode}</a>
         <br>

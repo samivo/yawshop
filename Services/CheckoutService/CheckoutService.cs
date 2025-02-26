@@ -443,7 +443,7 @@ public class CheckoutService : ICheckoutService
                     foreach (var eventCode in productInfo.EventCodes)
                     {
                         var evnt = (await _event.FindAsNoTrackingAsync(evnt => evnt.Code == eventCode)).SingleOrDefault() ?? throw new InvalidOperationException("No event found with given code");
-                        var dateString = evnt.EventStart.ToString("yyyy-MM-dd HH:mm");
+                        var dateString = DateTimeString.GetHumanReadableDateTimeString(evnt.EventStart); 
 
                         checkOutObject.Products.Add(new CheckoutItem
                         {

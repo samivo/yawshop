@@ -41,7 +41,7 @@ public class CleanerTimerService : ICleanerTimerService
                     foreach (var checkout in checkouts)
                     {
                         //If checkout is more than 10 minutes old
-                        if (checkout.CreatedAt < DateTime.Now.AddMinutes(-10))
+                        if (checkout.CreatedAt < DateTime.UtcNow.AddMinutes(-10))
                         {
                             await _stock.UpdateQuantitiesAsync(checkout, false);
                             checkout.PaymentStatus = Services.CheckoutService.Models.PaymentStatus.Cancelled;
