@@ -296,7 +296,7 @@ public class CheckoutService : ICheckoutService
             }
 
             checkout.PaymentStatus = callbackResult.PaymentStatus;
-            checkout.UpdatetAt = DateTime.Now;
+            checkout.UpdatetAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
@@ -359,9 +359,9 @@ public class CheckoutService : ICheckoutService
                     {
                         var giftcard = new GiftcardModel
                         {
-                            ExpireDate = DateTime.Now.AddDays(product.GiftcardPeriodInDays),
+                            ExpireDate = DateTime.UtcNow.AddDays(product.GiftcardPeriodInDays),
                             Name = productInfo.ProductName,
-                            PurchaseDate = DateTime.Now,
+                            PurchaseDate = DateTime.UtcNow,
                             TargetProductCode = product.GiftcardTargetProductCode,
                             OwnerClientId = checkout.ClientId
                         };

@@ -125,12 +125,12 @@ public class ProductService : IProductService
             return false;
         }
 
-        if (product.AvailableFrom > DateTime.Now)
+        if (product.AvailableFrom > DateTime.UtcNow)
         {
             return false;
         }
 
-        if (product.AvailableTo < DateTime.Now)
+        if (product.AvailableTo < DateTime.UtcNow)
         {
             return false;
         }

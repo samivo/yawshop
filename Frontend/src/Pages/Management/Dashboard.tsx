@@ -15,6 +15,7 @@ import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import DiscountIcon from '@mui/icons-material/Discount';
 import ProductList from './Products/ProductList';
 import { EventList } from './Events/EventList';
+import CheckoutList from './Checkouts/CheckoutList';
 
 const NAVIGATION: Navigation = [
   {
@@ -27,7 +28,7 @@ const NAVIGATION: Navigation = [
     icon: <DashboardIcon />,
   },
   {
-    segment: 'orders',
+    segment: 'checkouts',
     title: 'Ostot',
     icon: <CurrencyExchangeIcon />,
   },
@@ -108,6 +109,8 @@ function DashboardPage({ pathname }: { pathname: string }) {
       return (<ProductList />);
     case "/events":
       return (<EventList/>);
+    case "/checkouts":
+      return (<CheckoutList />);
     
   }
 

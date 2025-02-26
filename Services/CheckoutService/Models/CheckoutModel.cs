@@ -60,11 +60,11 @@ public class CheckoutModel
     public string? InternalComment { get; set; }
 
     [NoApiUpdate]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [NoApiUpdate]
     [NotPublic]
-    public DateTime UpdatetAt { get; set; } = DateTime.Now;
+    public DateTime UpdatetAt { get; set; } = DateTime.UtcNow;
 
     [NotPublic]
     [NoApiUpdate]

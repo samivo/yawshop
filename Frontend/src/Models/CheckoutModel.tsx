@@ -9,8 +9,8 @@ export interface CheckoutModel {
     transactionId: string | null;
     paymentStatus: PaymentStatus;
     paymentMethod: string | null;
-    createdAt: string; // ISO string format for dates
-    updatedAt: string; // ISO string format for dates
+    createdAt: Date; 
+    updatetAt: Date; 
     internalComment: string | null;
     modifierNme: string | null;
 }

@@ -87,11 +87,11 @@ public class ProductModel
 
     [NotPublic]
     [NoApiUpdate]
-    public DateTime CreatedAt { get; private set; } = DateTime.Now;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
     [NotPublic]
     [NoApiUpdate]
-    public DateTime ModifiedAt { get; private set; } = DateTime.Now;
+    public DateTime ModifiedAt { get; private set; } = DateTime.UtcNow;
 
     [NotPublic]
     [NoApiUpdate]
@@ -100,7 +100,7 @@ public class ProductModel
     public void UpdateAccess(string modifier)
     {
         Modifier = modifier;
-        ModifiedAt = DateTime.Now;
+        ModifiedAt = DateTime.UtcNow;
     }
 }
 

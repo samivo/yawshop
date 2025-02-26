@@ -44,12 +44,12 @@ namespace YawShop.Services.DiscountService.Models
 
         public bool IsValid()
         {
-            if (ValidFrom != null && ValidFrom > DateTime.Now)
+            if (ValidFrom != null && ValidFrom > DateTime.UtcNow)
             {
                 return false;
             }
 
-            if (ValidTo != null && ValidTo < DateTime.Now)
+            if (ValidTo != null && ValidTo < DateTime.UtcNow)
             {
                 return false;
             }

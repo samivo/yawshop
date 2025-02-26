@@ -32,7 +32,7 @@ public class ClientModel
 
     [NoApiUpdate]
     [NotPublic]
-    public DateTime CreatedAt { get; private set; } = DateTime.Now;
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
     [NotPublic]
     public string? InternalComment { get; set; }

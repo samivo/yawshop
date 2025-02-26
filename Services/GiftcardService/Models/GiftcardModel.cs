@@ -63,7 +63,7 @@ public class GiftcardModel : IPublishable
     {
 
         UserClientId = userClientId;
-        UsedDate = DateTime.Now;
+        UsedDate = DateTime.UtcNow;
 
     }
 
@@ -75,7 +75,7 @@ public class GiftcardModel : IPublishable
 
     public bool IsValid()
     {
-        if (UserClientId != null || UsedDate != null || ExpireDate < DateTime.Now)
+        if (UserClientId != null || UsedDate != null || ExpireDate < DateTime.UtcNow)
         {
             return false;
         }
