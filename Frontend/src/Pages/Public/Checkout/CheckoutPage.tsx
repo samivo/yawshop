@@ -381,9 +381,17 @@ export const CheckoutPage: React.FC = () => {
             throw new Error("Anna etunimi.");
             
         }
+        if(!/^[a-zA-ZäöåÄÖÅ\s\-']+$/.test(firstName)){
+            SetError((prevValue) => ([...prevValue, { fieldName: "firstName", errorText: "Sisältää ei sallittuja merkkejä" }]));
+            throw new Error("Ei sallittuja merkkejä.");
+        }
         if (!lastName) {
             SetError((prevValue) => ([...prevValue, { fieldName: "lastName", errorText: "Sukunimi vaaditaan" }]));
             throw new Error("Anna sukunimi.");
+        }
+        if(!/^[a-zA-ZäöåÄÖÅ\s\-']+$/.test(lastName)){
+            SetError((prevValue) => ([...prevValue, { fieldName: "lastName", errorText: "Sisältää ei sallittuja merkkejä" }]));
+            throw new Error("Ei sallittuja merkkejä.");
         }
         if (!email) {
             SetError((prevValue) => ([...prevValue, { fieldName: "email", errorText: "Sähköposti vaaditaan" }]));
